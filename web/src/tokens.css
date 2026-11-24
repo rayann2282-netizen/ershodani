@@ -1,0 +1,58 @@
+/* Design tokens — the only place with raw values. Source: DESIGN.md (سهرة). */
+:root {
+  /* Colours */
+  --color-bg: #101315;
+  --color-surface: #1a1f22;
+  --color-line: #2a3135;
+  --color-line-strong: #3a4246;
+  --color-text: #eef1ef;
+  --color-text-soft: #d5dbda;
+  --color-text-2: #a3acb0;
+  --color-locked: #8c979c;
+  --color-radio-off: #5a6468;
+  --color-disabled-text: #6b757a;
+  --color-accent: #2ec4b6;
+  --color-accent-pressed: #26a89c;
+  --color-on-accent: #062420;
+  --color-warning: #f2b35b;
+  --color-scrim: #070809;
+  --color-ghost-pressed: #232a2e;
+  --color-logo-tile: #0a1833;
+
+  /* Fonts */
+  --font-display: 'Readex Pro', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+
+  /* Type scale — 4 sizes only */
+  --text-display: 48px;
+  --text-title: 22px;
+  --text-body: 16px;
+  --text-caption: 13px;
+  --leading-tight: 1.2;
+  --leading-body: 1.6;
+
+  /* Spacing — 8px grid */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --size-row: 48px;
+  --size-button: 56px;
+
+  /* Radius */
+  --radius-bar: 2px;
+  --radius-badge: 8px;
+  --radius-input: 12px;
+  --radius-card: 16px;
+  --radius-sheet: 24px;
+  --radius-pill: 999px;
+
+  /* Borders */
+  --border: 1.5px;
+
+  /* Motion */
+  --press: transform 120ms ease, background-color 200ms ease;
+
+  /* Layout */
+  --screen-max: 430px;
+}

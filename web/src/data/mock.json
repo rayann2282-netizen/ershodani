@@ -1,0 +1,98 @@
+{
+  "_note": "Fictional sample data for ارشدني. Course codes, names, hours and prerequisites come from the IS two-semester study plan and the university requirement groups. People are invented.",
+  "students": [
+    {
+      "id": "stu_01",
+      "email": "a.aldossary@sm.imamu.edu.sa",
+      "fullName": "عبدالرحمن بن سلطان بن محمد الدوسري",
+      "major": "نظم المعلومات",
+      "startedOnThreeSemesterSystem": true,
+      "transcriptSummary": { "cumulativeGpa": 3.82, "gpaScale": 5, "earnedHours": 55, "passedCourses": 19 }
+    },
+    {
+      "id": "stu_02",
+      "email": "f.alharbi@sm.imamu.edu.sa",
+      "fullName": "Faisal Al-Harbi",
+      "major": "نظم المعلومات",
+      "startedOnThreeSemesterSystem": false,
+      "transcriptSummary": { "cumulativeGpa": null, "gpaScale": 5, "earnedHours": 0, "passedCourses": 0 },
+      "_state": "first semester → st/03-empty"
+    }
+  ],
+  "courses": [
+    { "prefix": "نال", "number": 1130, "nameAr": "هندسة المتطلبات", "hours": 3, "level": 2, "type": "mandatory", "prereqs": [] },
+    { "prefix": "عال", "number": 1241, "nameAr": "البرمجة الشيئية", "hours": 4, "level": 3, "type": "mandatory", "prereqs": ["عال 1140"] },
+    { "prefix": "احص", "number": 1011, "nameAr": "مقدمة في الاحتمالات والإحصاء", "hours": 3, "level": 3, "type": "mandatory", "prereqs": ["ريض 1113"] },
+    { "prefix": "نال", "number": 1235, "nameAr": "تحليل وتصميم النظم", "hours": 3, "level": 3, "type": "mandatory", "prereqs": ["نال 1130"] },
+    { "prefix": "نال", "number": 1200, "nameAr": "كفاءات الإدارة", "hours": 2, "level": 3, "type": "mandatory", "prereqs": ["نال 1130"] },
+    { "prefix": "عال", "number": 1242, "nameAr": "تراكيب البيانات", "hours": 4, "level": 4, "type": "mandatory", "prereqs": ["عال 1241"] },
+    { "prefix": "نال", "number": 1241, "nameAr": "مبادئ إدارة المشاريع", "hours": 3, "level": 4, "type": "mandatory", "prereqs": ["نال 1235"] },
+    { "prefix": "نال", "number": 1220, "nameAr": "مقدمة في قواعد البيانات", "hours": 4, "level": 4, "type": "mandatory", "prereqs": ["نال 1130"] },
+    { "prefix": "نال", "number": 1290, "nameAr": "علاقات الأعمال", "hours": 2, "level": 4, "type": "mandatory", "prereqs": ["نال 1200"] },
+    { "prefix": "حسب", "number": 1250, "nameAr": "مبادئ المحاسبة والتقارير المالية", "hours": 3, "level": 4, "type": "mandatory", "prereqs": [] },
+    { "prefix": "عال", "number": 1322, "nameAr": "أنظمة التشغيل", "hours": 4, "level": 5, "type": "mandatory", "prereqs": ["عال 1242", "نال 1200"] },
+    { "prefix": "نال", "number": 1350, "nameAr": "الفنتك: أسس وتطبيقات", "hours": 3, "level": 5, "type": "mandatory", "prereqs": ["نال 1235", "حسب 1250"] },
+    { "prefix": "نال", "number": 1310, "nameAr": "بنية المؤسسات", "hours": 3, "level": 5, "type": "mandatory", "prereqs": ["نال 1241"] },
+    { "prefix": "نال", "number": 1321, "nameAr": "نظم إدارة قواعد البيانات", "hours": 4, "level": 5, "type": "mandatory", "prereqs": ["نال 1220"] },
+    { "prefix": "قرأ", "number": 1001, "nameAr": "القرآن الكريم", "hours": 2, "level": 1, "type": "university", "prereqs": [] },
+    { "prefix": "نحو", "number": 1001, "nameAr": "المهارات اللغوية", "hours": 2, "level": 1, "type": "university", "prereqs": [] }
+  ],
+  "transcript_stu_01": [
+    { "course": "عال 1242", "grade": "ب", "hours": 4, "term": "الفصل الدراسي الثاني ١٤٤٧" },
+    { "course": "نال 1235", "grade": "أ", "hours": 3, "term": "الفصل الدراسي الثاني ١٤٤٧" },
+    { "course": "نال 1200", "grade": "هـ", "hours": 2, "term": "الفصل الدراسي الثاني ١٤٤٧" },
+    { "course": "احص 1011", "grade": "ج+", "hours": 3, "term": "الفصل الدراسي الأول ١٤٤٧" },
+    { "course": "عال 1241", "grade": "أ+", "hours": 4, "term": "الفصل الدراسي الأول ١٤٤٧" }
+  ],
+  "requirementGroups_stu_01": [
+    { "name": "متطلب جامعي اجباري", "rule": { "type": "courses", "count": 2 }, "passed": 1, "remaining": ["قرأ 1001"] },
+    { "name": "المعارف والقيم الاسلامية", "rule": { "type": "courses", "count": 1 }, "passed": 1, "remaining": [] },
+    { "name": "المهارات التواصلية والشخصية", "rule": { "type": "courses", "count": 1 }, "passed": 0, "remaining": ["ذاع 1001", "حيا 1001", "ادب 1001", "نفس 1001"] },
+    { "name": "المهارات المهنية وسوق العمل", "rule": { "type": "courses", "count": 2 }, "passed": 1, "remaining": ["رحب 1001", "دار 1001", "نجل 1001", "ادت 1001"] },
+    { "name": "متطلب جامعي ٥", "rule": { "type": "courses", "count": 2 }, "passed": 1, "remaining": ["احص 1001", "بلغ 1001", "نهج 1001"] },
+    { "name": "قيم تاريخية ووطنية واجتماعية", "rule": { "type": "courses", "count": 2 }, "passed": 2, "remaining": [] },
+    { "name": "مقررات حرة لكلية الحاسب", "rule": { "type": "hours", "count": 6 }, "passed": 6, "remaining": [] },
+    { "name": "نظم معلومات الإختيارية", "rule": { "type": "courses", "count": 3 }, "passed": 0, "remaining": ["نال 1372", "نال 1356", "نال 1357"], "_note": "starts at level 6, not offered in electives screen" }
+  ],
+  "universityCourseNames": {
+    "ذاع 1001": "مهارات الاتصال",
+    "حيا 1001": "الثقافة الصحية",
+    "ادب 1001": "مهارات التحرير والخطاب",
+    "نفس 1001": "الصحة النفسية",
+    "رحب 1001": "قيم العمل وأخلاقياته",
+    "دار 1001": "الابتكار وريادة الأعمال",
+    "نجل 1001": "مهارات اللغة الإنجليزية",
+    "ادت 1001": "مهارات القيادة",
+    "احص 1001": "أساسيات الإحصاء",
+    "بلغ 1001": "مهارات القراءة",
+    "نهج 1001": "مهارات التعلم الجامعي"
+  },
+  "plan_stu_01": {
+    "maxHours": 20,
+    "late": [
+      { "course": "نال 1200", "hours": 2, "reason": "failed", "grade": "هـ", "locks": ["عال 1322", "نال 1290"] },
+      { "course": "قرأ 1001", "hours": 2, "reason": "not_registered" }
+    ],
+    "levelCourses": [
+      { "course": "نال 1220", "hours": 4 },
+      { "course": "نال 1241", "hours": 3 },
+      { "course": "حسب 1250", "hours": 3 }
+    ],
+    "locked": [
+      { "course": "عال 1322", "blockedBy": ["نال 1200"] },
+      { "course": "نال 1290", "blockedBy": ["نال 1200"] }
+    ],
+    "chosenElectives": [],
+    "totalHours": 14,
+    "remainingHours": 6,
+    "courseCount": 5
+  },
+  "gpaCalc_stu_01": {
+    "currentGpa": 3.82,
+    "earnedHours": 55,
+    "plannedHours": 14,
+    "targetGpa": 4.0,
+    "requiredGpa": 4.71,
+    "maxReachableGpa": 4.05
+  }
+}
