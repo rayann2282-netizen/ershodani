@@ -16,8 +16,10 @@ export default function LockedSheet() {
   if (!item) return null
 
   const blocker = plan.late.find((l) => item.blockedBy.includes(l.key))
-  const blockerName = courseName(item.blockedBy[0])
+  const blockerName = courseName(blocker?.key ?? item.blockedBy[0])
   const unlocks = blocker ? blocker.locks.map(courseName) : [courseName(item.key)]
+  // متطلبها في خطة هالترم (مو راسب فيه): ما ينفع تاخذهم مع بعض.
+  const takingNow = !blocker && plan.eligible.some((c) => item.blockedBy.includes(c.key))
   const verb = blocker?.reason === 'withdrawn' ? `حذفت ${blockerName}` : `لم تتجاوز ${blockerName}`
 
   return (
@@ -45,7 +47,9 @@ export default function LockedSheet() {
         </div>
 
         <p className="soft">
-          {verb}، فتقفلت عليك هذي المادة. سجّلها هالترم: إذا نجحت فيها، تنفتح لك {unlocks.join(' و')} الترم اللي بعده، وما تتأخر.
+          {takingNow
+            ? `متطلبها «${blockerName}» في خطتك هالترم، وما ينفع تاخذهم مع بعض. إذا تجاوزت ${blockerName}، تنفتح لك ${courseName(item.key)} الترم اللي بعده.`
+            : `${verb}، فتقفلت عليك هذي المادة. سجّلها هالترم: إذا نجحت فيها، تنفتح لك ${unlocks.join(' و')} الترم اللي بعده، وما تتأخر.`}
         </p>
 
         <Link to={backTo} className="btn btn--primary">تمام، فهمت</Link>

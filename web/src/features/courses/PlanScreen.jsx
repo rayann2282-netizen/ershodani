@@ -10,7 +10,7 @@ import { ar, coursesCount, courseCode, hoursCount, hoursShort } from '../../lib/
 
 // الحالات: ?state=loading | empty | full | save-error | saved | withdrawn | in-progress
 const DATA_STATES = ['withdrawn', 'in-progress', 'full', 'empty']
-const FULL_ELECTIVES = ['ذاع 1001', 'دار 1001']
+const FULL_ELECTIVES = ['ذاع 1001']
 
 const LATE_REASON = {
   failed: 'لم تتجاوزها · سجّلها هالترم عشان ما تتأخر',
@@ -55,11 +55,13 @@ export default function PlanScreen() {
   if (state === 'loading') return <PlanLoading />
   if (plan.isEmpty) return <PlanEmpty />
 
-  // سبب القفل: «بسبب كفاءات الإدارة» أو «لأنك حذفت كفاءات الإدارة».
+  // سبب القفل: «بسبب كفاءات الإدارة»، أو «لأنك حذفت …»، أو «بعد المحاسبة» (متطلبها في خطة هالترم).
   const lockReason = (blockedBy) => {
     const blocker = plan.late.find((l) => blockedBy.includes(l.key))
-    const name = courseName(blockedBy[0])
-    return blocker?.reason === 'withdrawn' ? `لأنك حذفت ${name}` : `بسبب ${name}`
+    const name = courseName(blocker?.key ?? blockedBy[0])
+    if (blocker?.reason === 'withdrawn') return `لأنك حذفت ${name}`
+    if (!blocker && plan.eligible.some((c) => blockedBy.includes(c.key))) return `بعد ${name}`
+    return `بسبب ${name}`
   }
 
   return (
@@ -121,14 +123,24 @@ export default function PlanScreen() {
           ),
         )}
 
-        {plan.eligible.length > 0 && <div className="section-label">المستوى {ar(student.currentLevel.level)} في مسارك</div>}
-        {plan.eligible.map((c) => (
-          <div key={c.key} className="row row--pad">
-            <span className="row__main">
-              <span>{courseName(c.key)}</span>
-              {c.conditionalOn.length > 0 && <span className="caption muted">تنفتح لك إذا تجاوزت «{courseName(c.conditionalOn[0])}» هالترم</span>}
-            </span>
-            <span className="row__end">{hoursShort(c.hours)}</span>
+        {/* مواد التخصص مقسومة على المستويات: مستواك، وبعده اللي عبّيناه من المستوى الجاي */}
+        {[...new Set(plan.eligible.map((c) => c.level))].map((level) => (
+          <div key={level ?? 'none'} style={{ display: 'contents' }}>
+            <div className="section-label">
+              المستوى {ar(level)} في مسارك{level !== student.currentLevel.level && ' · متطلباتها خالصة'}
+            </div>
+            {plan.eligible
+              .filter((c) => c.level === level)
+              .map((c) => (
+                <div key={c.key} className="row row--pad">
+                  <span className="row__main">
+                    <span>{courseName(c.key)}</span>
+                    {c.conditionalOn.length > 0 && <span className="caption muted">تنفتح لك إذا تجاوزت «{courseName(c.conditionalOn[0])}» هالترم</span>}
+                  </span>
+                  {plan.deferSuggestion === c.key && <span className="caption warn semibold">نقترح تأجيلها</span>}
+                  <span className="row__end">{hoursShort(c.hours)}</span>
+                </div>
+              ))}
           </div>
         ))}
 

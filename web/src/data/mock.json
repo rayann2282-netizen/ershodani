@@ -30,7 +30,7 @@
     { "prefix": "نال", "number": 1220, "nameAr": "مقدمة في قواعد البيانات", "hours": 4, "level": 4, "type": "mandatory", "prereqs": ["نال 1130"] },
     { "prefix": "نال", "number": 1290, "nameAr": "علاقات الأعمال", "hours": 2, "level": 4, "type": "mandatory", "prereqs": ["نال 1200"] },
     { "prefix": "حسب", "number": 1250, "nameAr": "مبادئ المحاسبة والتقارير المالية", "hours": 3, "level": 4, "type": "mandatory", "prereqs": [] },
-    { "prefix": "عال", "number": 1322, "nameAr": "أنظمة التشغيل", "hours": 4, "level": 5, "type": "mandatory", "prereqs": ["عال 1242", "نال 1200"] },
+    { "prefix": "عال", "number": 1322, "nameAr": "أنظمة التشغيل", "hours": 4, "level": 5, "type": "mandatory", "prereqs": ["عال 1242", "نال 1130"] },
     { "prefix": "نال", "number": 1350, "nameAr": "الفنتك: أسس وتطبيقات", "hours": 3, "level": 5, "type": "mandatory", "prereqs": ["نال 1235", "حسب 1250"] },
     { "prefix": "نال", "number": 1310, "nameAr": "بنية المؤسسات", "hours": 3, "level": 5, "type": "mandatory", "prereqs": ["نال 1241"] },
     { "prefix": "نال", "number": 1321, "nameAr": "نظم إدارة قواعد البيانات", "hours": 4, "level": 5, "type": "mandatory", "prereqs": ["نال 1220"] },

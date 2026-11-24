@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { AuthProvider } from './features/auth/AuthContext.jsx'
 import RequireAuth from './features/auth/RequireAuth.jsx'
 import { StudentProvider } from './features/courses/StudentContext.jsx'
+import RequireRecord from './features/courses/RequireRecord.jsx'
 import LoginScreen from './features/auth/LoginScreen.jsx'
 import UploadScreen from './features/courses/UploadScreen.jsx'
 import ConfirmScreen from './features/courses/ConfirmScreen.jsx'
@@ -23,13 +24,16 @@ export default function App() {
             <Route path="/login" element={<LoginScreen />} />
             <Route element={<RequireAuth />}>
               <Route path="/upload" element={<UploadScreen />} />
-              <Route path="/confirm" element={<ConfirmScreen />} />
-              <Route path="/plan" element={<PlanScreen />}>
-                <Route path="locked/:code" element={<LockedSheet />} />
-              </Route>
-              <Route path="/electives" element={<ElectivesScreen />} />
-              <Route path="/gpa" element={<GpaScreen />} />
               <Route path="/states" element={<StatesScreen />} />
+              {/* هذي تحتاج إن الطالب رفع ملفاته */}
+              <Route element={<RequireRecord />}>
+                <Route path="/confirm" element={<ConfirmScreen />} />
+                <Route path="/plan" element={<PlanScreen />}>
+                  <Route path="locked/:code" element={<LockedSheet />} />
+                </Route>
+                <Route path="/electives" element={<ElectivesScreen />} />
+                <Route path="/gpa" element={<GpaScreen />} />
+              </Route>
             </Route>
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>

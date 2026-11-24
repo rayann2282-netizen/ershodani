@@ -12,7 +12,7 @@ Must stories (updated by the design decisions in HANDOFF.md §10):
 Should/Could, now in scope: choose university requirements to fill the remaining hours; save the plan as an image.
 
 Out of scope: section details (CRNs, times, instructors, rooms), schedule conflicts, university portal login/integration, OCR of scanned PDFs, multiple majors or colleges, the very old plans F–H, chat with advisors, any AI feature, real-time features.
-Current phase: **backend, step 1 (auth)**. The front end is done on mock data; student progress is in `web/src/lib/progressStore.js` (localStorage) until the database replaces it. PDF parsing and image export come later.
+Current phase: **backend, step 3 (reading the PDFs)**. Auth and saving progress in Supabase are done (`web/src/lib/progressStore.js`). The parsers are in `web/src/features/upload/`; tests use invented data, never a real student's file. Image export and deploy come later.
 If I ask for anything out of scope, say so before building it.
 
 ## Design
@@ -34,7 +34,8 @@ If I ask for anything out of scope, say so before building it.
 | Plain CSS + `tokens.css` | No extra tool to learn | — |
 | State: `useState` + one Context for the signed-in user | 3 screens don't need a state library | — |
 | Supabase (free plan): Postgres + Auth | Saves each student's progress across devices | supabase-js 2.119.0 |
-| Vitest | Tests the two core calculations only | 5.1.0 |
+| pdfjs-dist (Mozilla) | Reads the two portal PDFs in the browser; the file never leaves the phone. Loaded only on the upload screen | 6.5.438 |
+| Vitest | Tests the core calculations, the PDF parsers (with invented data only) and the study-plan data | 5.1.0 |
 | Vercel (Hobby) | Free hosting for `web/` | — |
 
 Notes:

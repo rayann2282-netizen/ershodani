@@ -18,6 +18,11 @@ export const demoStudent = {
 
   // من كشف المقررات المتبقية: مواد مستواك الجاي حسب مسارك.
   currentLevel: { level: 4, courses: ['نال 1220', 'نال 1241', 'حسب 1250', 'نال 1290', 'عال 1322'] },
+  // كل المستويات الباقية من الكشف (المستوى ٥ نعبّي منه لو فيه مكان).
+  remainingLevels: [
+    { level: 4, courses: ['نال 1220', 'نال 1241', 'حسب 1250', 'نال 1290', 'عال 1322'] },
+    { level: 5, courses: ['نال 1350', 'نال 1310', 'نال 1321'] },
+  ],
 
   // متطلبات جامعية إجبارية ما سجلها.
   mandatoryUniversity: ['قرأ 1001'],
@@ -45,7 +50,7 @@ export function studentForState(state) {
     return { ...demoStudent, transcript: [...demoStudent.transcript, { course: 'احص 1011', grade: 'ع' }] }
   }
   if (state === 'empty') {
-    return { ...demoStudent, currentLevel: { level: null, courses: [] }, mandatoryUniversity: [], transcript: demoStudent.transcript.filter((t) => t.grade !== 'هـ') }
+    return { ...demoStudent, currentLevel: { level: null, courses: [] }, remainingLevels: [], mandatoryUniversity: [], transcript: demoStudent.transcript.filter((t) => t.grade !== 'هـ') }
   }
   return demoStudent
 }

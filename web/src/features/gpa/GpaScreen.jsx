@@ -13,7 +13,7 @@ const STEP = 0.25
 export default function GpaScreen() {
   const { student, chosenElectives, gpaInputs, setGpaInputs } = useStudent()
   const fromFiles = {
-    current: ar(student.summary.cumulativeGpa, 2),
+    current: ar(student.summary.cumulativeGpa ?? 0, 2),
     earned: ar(student.summary.earnedHours),
     planned: ar(buildPlan({ student, chosenElectives }).totalHours),
   }

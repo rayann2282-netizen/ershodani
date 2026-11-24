@@ -20,6 +20,7 @@ export default function ElectivesScreen() {
   const basePlan = buildPlan({ student })
   const cap = basePlan.remainingHours
   const groups = state === 'empty' ? [] : openGroups(student.groups)
+  const doneGroups = student.groups.filter((g) => g.passed >= g.required).map((g) => ar(g.name))
   const [picked, setPicked] = useState(state === 'full' ? FULL_PICKS : chosenElectives)
   const usedHours = picked.length * UNIVERSITY_COURSE_HOURS
   const atCap = usedHours + UNIVERSITY_COURSE_HOURS > cap
@@ -71,7 +72,7 @@ export default function ElectivesScreen() {
           return (
             <section key={g.name} className="card card--flush" style={{ paddingBlockEnd: 'var(--space-1)' }} aria-label={g.name}>
               <div className="card__head">
-                <span className="bold">{g.name}</span>
+                <span className="bold">{ar(g.name)}</span>
                 <span className="row__end caption">{groupDone ? 'كمّلته' : `باقي ${ar(g.remaining - inGroup)} من ${ar(g.required)}`}</span>
               </div>
               {g.options.map((key) => {
@@ -88,7 +89,7 @@ export default function ElectivesScreen() {
             </section>
           )
         })}
-        <div className="caption muted">كمّلت: المعارف والقيم الإسلامية · القيم التاريخية والوطنية · المقررات الحرة</div>
+        {doneGroups.length > 0 && <div className="caption muted">كمّلت: {doneGroups.join(' · ')}</div>}
       </div>
 
       <button type="button" className="btn btn--primary" disabled={picked.length === 0} onClick={confirm}>

@@ -11,11 +11,12 @@ const REASON = { failed: 'لم تتجاوزها', withdrawn: 'حذفتها' }
 // ?state=empty → أول ترم (الجامعة تسجّل مواد المستوى الأول تلقائياً).
 export default function ConfirmScreen() {
   const [params] = useSearchParams()
-  const isEmpty = params.get('state') === 'empty'
-  const { student, markedPassed, setMarkedPassed } = useStudent()
+  const { student, hasRecord, markedPassed, setMarkedPassed } = useStudent()
 
   const notPassed = student.transcript.filter((t) => ['failed', 'withdrawn'].includes(gradeStatus(t.grade)))
-  const passedCount = student.summary.passedCount + markedPassed.length
+  // البيانات الحقيقية تحسب «لا، خلصتها» من نفسها؛ الطالب الوهمي لا.
+  const passedCount = hasRecord ? student.summary.passedCount : student.summary.passedCount + markedPassed.length
+  const isEmpty = params.get('state') === 'empty' || (hasRecord && passedCount === 0)
 
   function markAsPassed(course) {
     setMarkedPassed([...markedPassed, course])
@@ -49,7 +50,10 @@ export default function ConfirmScreen() {
             <h1 className="display">خلصت {ar(passedCount)} مادة</h1>
             <p className="muted">قرينا الملفين. راجعها بسرعة قبل ما نرتب خطتك.</p>
           </div>
-          <FileChecks name={student.fullName} transcriptNote={`المعدل ${ar(student.summary.cumulativeGpa, 2)} من ٥`} />
+          <FileChecks
+            name={student.fullName ?? `${ar(student.currentLevel.courses.length + student.mandatoryUniversity.length)} مادة باقية لترمك الجاي`}
+            transcriptNote={student.summary.cumulativeGpa === null ? 'ما فيه معدل للحين' : `المعدل ${ar(student.summary.cumulativeGpa, 2)} من ٥`}
+          />
 
           <div className="grow stack stack--2">
             <button type="button" className="btn btn--secondary" aria-expanded="false" style={{ justifyContent: 'flex-start', paddingInline: 'var(--space-2)', border: 0, background: 'var(--color-surface)', height: 'var(--size-button)' }}>

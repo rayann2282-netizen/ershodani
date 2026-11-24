@@ -95,7 +95,7 @@ Source: the university's grade-code sheet («رموز التقديرات»).
 
 **Plan**
 10. The student's track comes from the report (its level groups ف٤…ف٨). No A–E track tables are needed.
-11. Order: late courses first (badge «أولوية»), then the current level from the report, then the suggestion for remaining hours, then locked courses.
+11. Order (changed 2026-11-24): late courses first (failed or withdrawn only, badge «أولوية»), then the current level from the report, then **open courses from the next levels** in plan order while they fit under 19 hours, then the suggestion for remaining hours, then locked courses. A next-level course whose prerequisite is in this semester's plan is shown locked: «بعد [المادة]». Mandatory university courses (القرآن، المهارات اللغوية) are **not late**: they can be taken any term, so they are the first group in «اختر متطلباتك».
 12. A course is **locked** if any prerequisite is not passed. Show which course blocks it: «بسبب كفاءات الإدارة».
 13. A failed or withdrawn course that blocks others shows the cause chain and «قفلت عليك مادتين».
 14. The maximum is **19 hours** per semester. If the total is over 19, suggest deferring a course that **blocks no mandatory course**: first a chosen university requirement, then a level course, then a late course.
@@ -141,7 +141,9 @@ Source: the university's grade-code sheet («رموز التقديرات»).
 
 1. **[?] Privacy:** should the PDFs be parsed in the browser and never uploaded, or stored in Supabase Storage? The transcript holds the name, student ID and birth year. Recommendation: parse client-side and store only the course list.
 2. ~~What do grades `ح`, `م` and `ل` mean for the plan?~~ Settled: `ح` = not passed (rule 8); `م` and `ل` = passed, with a note (rule 9).
-3. **[?]** Prerequisite data for every course must be typed in from the study-plan PDF. Who checks it for errors?
+3. ~~Who checks the prerequisite data?~~ Decided (2026-11-24): a Vitest test checks every course in `studyPlan.js` against the official plan (hours, level, prerequisites), and the student checks the level 4–5 courses (the demo) with one person from the department.
+3a. Found (2026-11-24) by checking against «المقررات المكافئة … مع المتطلبات» (للنشر) and the final plan: أنظمة التشغيل (عال 1322) needs **عال 1242 + نال 1130**, not نال 1200. Fixed in `studyPlan.js`. So in the demo, failing كفاءات الإدارة locks علاقات الأعمال only; the design's «قفلت عليك مادتين» example (canvas `hf/05-locked`) is now out of date. Old three-semester codes are mapped to their new equivalents (`EQUIVALENTS` in `studyPlan.js`) before checking prerequisites.
+3b. Decided (2026-11-24): when a student uploads new files, the new report and transcript **replace** the old ones completely; «لا، خلصتها» marks and chosen requirements stay only if they still make sense for the new files.
 4. **[?]** Does every remaining-courses report have the same layout (level groups «نظم المعلومات ف٤…» + requirement groups + «تجاوز … من المجموعة»)? Test it with 3–5 real students.
 5. **[?]** The sign-up screen and the manual-grade entry screen are not designed. The prototype links them to the next screen.
 6. **[?]** Chosen electives must update the plan total and the GPA `planned` hours. The prototype doesn't do this.

@@ -1,14 +1,39 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { demoStudent } from '../../data/mockStudents.js'
-import { EMPTY_PROGRESS, clearProgress, loadProgress, saveProgress } from '../../lib/progressStore.js'
+import { registerCourseNames } from '../../data/studyPlan.js'
+import { EMPTY_PROGRESS, clearProgress, loadProgress, saveProgress, saveUpload } from '../../lib/progressStore.js'
 import { useAuth } from '../auth/AuthContext.jsx'
+import { gradeStatus } from './plan.js'
 
 // Context = مكان واحد نحفظ فيه بيانات الطالب، وأي شاشة تقدر تقراها
-// بدون ما نمررها من شاشة لشاشة. بيانات الملفين الحين وهمية،
-// وتقدّم الطالب (اختياراته) ينحفظ في Supabase عن طريق progressStore.
+// بدون ما نمررها من شاشة لشاشة. كل شي ينحفظ في Supabase عن طريق progressStore.
 const StudentContext = createContext(null)
 
 const SAVE_DELAY_MS = 600 // ننتظر شوي بعد آخر تعديل، عشان ما نحفظ مع كل حرف يكتبه
+
+// المتطلبات الجامعية الإجبارية (القرآن، المهارات اللغوية) ياخذها أي ترم،
+// فنحطها أول قسم في «اختر متطلباتك» بدل ما تكون «متأخرة».
+export function withMandatoryGroup(groups, mandatoryUniversity) {
+  if (!mandatoryUniversity?.length) return groups
+  return [{ name: 'متطلب جامعي إجباري', required: mandatoryUniversity.length, passed: 0, options: mandatoryUniversity, names: {} }, ...groups]
+}
+
+// من اللي قريناه من ملفاته ← نفس شكل الطالب اللي تستخدمه الخطة.
+function studentFromRecord(record, markedPassed) {
+  const transcript = record.transcript.map((t) => (markedPassed.includes(t.course) ? { ...t, grade: 'ند' } : t))
+  return {
+    transcript,
+    currentLevel: record.currentLevel,
+    remainingLevels: record.remainingLevels ?? [],
+    mandatoryUniversity: record.mandatoryUniversity,
+    groups: withMandatoryGroup(record.groups, record.mandatoryUniversity),
+    summary: {
+      cumulativeGpa: record.summary.cumulativeGpa,
+      earnedHours: record.summary.earnedHours,
+      passedCount: transcript.filter((t) => gradeStatus(t.grade) === 'passed').length,
+    },
+  }
+}
 
 export function StudentProvider({ children }) {
   const { user, ready } = useAuth()
@@ -24,6 +49,7 @@ export function StudentProvider({ children }) {
     setLoaded(false)
     loadProgress(userId).then((saved) => {
       if (!active) return
+      saved.record?.groups?.forEach((g) => registerCourseNames(g.names))
       lastSaved.current = saved
       setProgress(saved)
       setLoaded(true)
@@ -44,26 +70,38 @@ export function StudentProvider({ children }) {
     return () => clearTimeout(timer)
   }, [progress, loaded, userId])
 
-  const { markedPassed, chosenElectives, gpaInputs } = progress
+  const { markedPassed, chosenElectives, gpaInputs, record } = progress
   const setMarkedPassed = (list) => setProgress((p) => ({ ...p, markedPassed: list }))
   const setChosenElectives = (list) => setProgress((p) => ({ ...p, chosenElectives: list }))
   const setGpaInputs = (inputs) => setProgress((p) => ({ ...p, gpaInputs: inputs }))
   const resetProgress = async () => {
     await clearProgress(userId)
-    lastSaved.current = EMPTY_PROGRESS
-    setProgress(EMPTY_PROGRESS)
+    const next = { ...EMPTY_PROGRESS, record }
+    lastSaved.current = next
+    setProgress(next)
   }
 
-  // نطبق «لا، خلصتها» على السجل: المادة تصير «ند» (ناجح).
+  // الطالب رفع ملفين وانقروا: نحفظهم ونبدّل القديم. يرجع رسالة خطأ أو null.
+  async function applyUpload(parsed) {
+    const result = await saveUpload(userId, parsed, progress)
+    if (result.error) {
+      console.error('[Ershodani] Could not save the files:', result.error.message)
+      return 'offline'
+    }
+    result.record.groups.forEach((g) => registerCourseNames(g.names))
+    const next = { ...progress, record: result.record, markedPassed: result.markedPassed, chosenElectives: result.chosenElectives }
+    lastSaved.current = next
+    setProgress(next)
+    return null
+  }
+
+  // بيانات الطالب الحقيقية لو رفع ملفاته. الطالب الوهمي بس لصفحات التجربة (?state=...).
   const student = useMemo(
-    () => ({
-      ...demoStudent,
-      transcript: demoStudent.transcript.map((t) => (markedPassed.includes(t.course) ? { ...t, grade: 'ند' } : t)),
-    }),
-    [markedPassed],
+    () => (record ? studentFromRecord(record, markedPassed) : { ...demoStudent, groups: withMandatoryGroup(demoStudent.groups, demoStudent.mandatoryUniversity) }),
+    [record, markedPassed],
   )
 
-  const value = { student, loaded, chosenElectives, setChosenElectives, markedPassed, setMarkedPassed, gpaInputs, setGpaInputs, resetProgress }
+  const value = { student, hasRecord: Boolean(record), loaded, chosenElectives, setChosenElectives, markedPassed, setMarkedPassed, gpaInputs, setGpaInputs, resetProgress, applyUpload }
   // ما نعرض الشاشات قبل ما نقرأ المحفوظ، عشان ما تبدأ فاضية وبعدين تتغيّر.
   return <StudentContext.Provider value={value}>{loaded ? children : null}</StudentContext.Provider>
 }

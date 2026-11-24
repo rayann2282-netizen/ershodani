@@ -1,12 +1,13 @@
-import { useEffect } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { LogoLockup } from '../../components/Logo.jsx'
 import { Steps } from '../../components/BackHeader.jsx'
 import { AlertIcon, CheckIcon, Spinner, UploadIcon, WifiOffIcon } from '../../components/Icons.jsx'
+import { readPortalFiles } from '../upload/readFiles.js'
+import { useStudent } from './StudentContext.jsx'
 
-// الحالات: ?state=loading | unreadable | missing | offline
-// الحين «اختر الملفين» ما يفتح ملفات فعلاً: يمثّل القراءة ويروح لتأكد من موادك.
-// قراءة الـ PDF الحقيقية تجي مع الباك اند.
+// الطالب يختار الملفين مع بعض. نقرأهم في المتصفح (ما يطلعون من الجوال)، ونحفظ قائمة المواد بس.
+// روابط التجربة: ?state=loading | unreadable | missing | offline
 
 function Slot({ number, title, note, status }) {
   const cls = { done: 'slot slot--done', error: 'slot slot--error', missing: 'slot slot--missing', loading: 'slot slot--done' }[status] ?? 'slot'
@@ -25,117 +26,151 @@ function Slot({ number, title, note, status }) {
   )
 }
 
-const COPY = {
-  idle: {
-    title: 'ارفع الملفات',
-    body: 'من الخدمات الذاتية. اخترهم مع بعض، وإحنا نعرف كل واحد لحاله.',
-    slots: [
-      ['idle', 'منه نعرف وش باقي عليك ومسارك'],
-      ['idle', 'منه نعرف درجاتك ومعدلك'],
-    ],
-  },
-  loading: {
-    title: 'حمل الملفات',
-    body: 'ثواني بس. خلّ الصفحة مفتوحة.',
-    slots: [
-      ['done', 'قريناه · ٢٧ مادة باقية عليك'],
-      ['loading', 'نقرأ درجاتك…'],
-    ],
-  },
-  unreadable: {
-    eyebrow: 'ما قدرنا نقرأ واحد منهم',
-    title: 'السجل صورة',
-    body: null, // فيه اسم ملف إنجليزي، فنكتبه تحت
-    slots: [
-      ['done', 'قريناه'],
-      ['error', 'صورة مو PDF'],
-    ],
-  },
-  missing: {
-    eyebrow: 'اخترت ملف واحد بس',
-    title: 'ناقصك السجل',
-    body: 'وصلنا كشف المقررات المتبقية. نحتاج السجل الأكاديمي بعد، عشان نضبطك بأحلى جدول',
-    slots: [
-      ['done', 'وصل'],
-      ['missing', 'ما وصل'],
-    ],
-  },
-  offline: {
-    eyebrow: 'وقف الرفع في النص',
-    title: 'انقطع النت',
-    body: 'ملفاتك ما ضاعت، محفوظة في جوالك. أول ما يرجع النت اضغط «جرّب مرة ثانية» ونكمل من مكان ما وقفنا.',
-    slots: [
-      ['done', 'انرفع'],
-      ['missing', 'وقف عند ٤٠٪'],
-    ],
-  },
+const REPORT = 'كشف المقررات المتبقية'
+const TRANSCRIPT = 'السجل الأكاديمي'
+
+// كل حالة: العنوان والكلام وحالة الخانتين. `info` فيه تفاصيل الخطأ الحقيقي.
+function copyFor(status, info = {}) {
+  switch (status) {
+    case 'loading':
+      return { title: 'حمل الملفات', body: 'ثواني بس. خلّ الصفحة مفتوحة.', slots: [['loading', 'نقرأ الكشف…'], ['loading', 'نقرأ درجاتك…']] }
+    case 'unreadable': {
+      const isImage = info.reason === 'not_pdf'
+      return {
+        eyebrow: 'ما قدرنا نقرأ واحد منهم',
+        title: isImage ? 'الملف صورة' : 'الملف ما انقرأ',
+        fileName: info.fileName ?? 'Screenshot_2026-11-20.png',
+        body: isImage
+          ? 'صورة، وإحنا نقرأ ملفات PDF بس. نزّل الكشف والسجل من البوابة كـ PDF واخترهم من جديد.'
+          : 'مو ملف من البوابة، أو PDF ممسوح بالكاميرا. نزّل الكشف والسجل من البوابة كـ PDF واخترهم من جديد.',
+        slots: [['idle', 'نحتاجه PDF من البوابة'], ['idle', 'نحتاجه PDF من البوابة']],
+        retry: 'اختر الملفين من جديد',
+      }
+    }
+    case 'missing': {
+      const needReport = info.missing === 'remaining_report'
+      return {
+        eyebrow: 'اخترت ملف واحد بس',
+        title: needReport ? 'ناقصك الكشف' : 'ناقصك السجل',
+        body: needReport
+          ? `وصلنا ${TRANSCRIPT}. نحتاج ${REPORT} بعد، عشان نعرف وش باقي عليك.`
+          : `وصلنا ${REPORT}. نحتاج ${TRANSCRIPT} بعد، عشان نضبطك بأحلى جدول`,
+        slots: needReport ? [['missing', 'ما وصل'], ['done', 'وصل']] : [['done', 'وصل'], ['missing', 'ما وصل']],
+        retry: 'اختر الملفين مع بعض',
+      }
+    }
+    case 'offline':
+      return {
+        eyebrow: 'وقف الحفظ في النص',
+        title: 'انقطع النت',
+        body: 'ملفاتك ما ضاعت، محفوظة في جوالك. أول ما يرجع النت اضغط «جرّب مرة ثانية» ونكمل من مكان ما وقفنا.',
+        slots: [['done', 'قريناه'], ['missing', 'ما انحفظ']],
+        retry: 'جرّب مرة ثانية',
+      }
+    default:
+      return {
+        title: 'ارفع الملفات',
+        body: 'من الخدمات الذاتية. اخترهم مع بعض، وإحنا نعرف كل واحد لحاله.',
+        slots: [['idle', 'منه نعرف وش باقي عليك ومسارك'], ['idle', 'منه نعرف درجاتك ومعدلك']],
+      }
+  }
 }
 
 export default function UploadScreen() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
-  const state = COPY[params.get('state')] ? params.get('state') : 'idle'
-  const copy = COPY[state]
-  const isError = ['unreadable', 'missing', 'offline'].includes(state)
+  const demoState = params.get('state')
+  const { applyUpload } = useStudent()
+  const input = useRef(null)
+  const lastParsed = useRef(null) // نحتفظ بالقراءة عشان «جرّب مرة ثانية» ما يحتاج يختار من جديد
+  const [status, setStatus] = useState('idle')
+  const [info, setInfo] = useState({})
 
-  // في التحميل: بعد ثانية ونص نروح لتأكد من موادك (تمثيل للقراءة).
-  useEffect(() => {
-    if (state !== 'loading') return
-    const timer = setTimeout(() => navigate('/confirm'), 1500)
-    return () => clearTimeout(timer) // نوقف المؤقت لو طلع من الشاشة
-  }, [state, navigate])
+  const shown = demoState ?? status
+  const copy = copyFor(shown, info)
+  const isError = ['unreadable', 'missing', 'offline'].includes(shown)
+
+  async function save(parsed) {
+    setStatus('loading')
+    const problem = await applyUpload(parsed)
+    if (problem) setStatus('offline')
+    else navigate('/confirm')
+  }
+
+  async function handleFiles(event) {
+    const files = event.target.files
+    if (!files?.length) return
+    setStatus('loading')
+    setInfo({})
+    try {
+      const result = await readPortalFiles(files)
+      if (!result.ok) {
+        setInfo(result)
+        setStatus(result.problem)
+        return
+      }
+      lastParsed.current = result
+      await save(result)
+    } catch (error) {
+      console.error('[Ershodani] Could not read the files:', error)
+      setInfo({ reason: 'broken' })
+      setStatus('unreadable')
+    } finally {
+      event.target.value = '' // عشان لو اختار نفس الملفات مرة ثانية، يشتغل
+    }
+  }
+
+  function primaryAction() {
+    if (shown === 'offline' && lastParsed.current) return save(lastParsed.current)
+    input.current?.click()
+  }
 
   return (
     <main className="screen screen--roomy">
+      <input ref={input} type="file" accept="application/pdf,.pdf" multiple hidden onChange={handleFiles} />
       <header className="header">
         <LogoLockup />
       </header>
-      <Steps step={1} percent={{ idle: 50, loading: 75, offline: 62 }[state] ?? 50} />
+      <Steps step={1} percent={{ idle: 50, loading: 75, offline: 62 }[shown] ?? 50} />
 
-      <div className="stack" role={isError ? 'alert' : undefined}>
+      <div className="stack" role={isError ? 'alert' : undefined} aria-live="polite">
         {copy.eyebrow && (
           <div className="eyebrow warn">
-            {state === 'offline' ? <WifiOffIcon /> : <AlertIcon />}
+            {shown === 'offline' ? <WifiOffIcon /> : <AlertIcon />}
             {copy.eyebrow}
           </div>
         )}
         <h1 className="display">{copy.title}</h1>
-        {copy.body && <p className="muted">{copy.body}</p>}
-        {state === 'unreadable' && (
-          <p className="muted">
-            الملف <span dir="ltr">«Screenshot_2026-11-20.png»</span> صورة شاشة، وإحنا نقرأ ملفات PDF بس. نزّل السجل الأكاديمي من البوابة كـ PDF واختره من جديد.
-          </p>
-        )}
+        <p className="muted">
+          {copy.fileName && (
+            <>
+              الملف <span dir="ltr">«{copy.fileName}»</span>{' '}
+            </>
+          )}
+          {copy.body}
+        </p>
       </div>
 
       <div className="stack">
-        <Slot number="١" title="كشف المقررات المتبقية" status={copy.slots[0][0]} note={copy.slots[0][1]} />
-        <Slot number="٢" title="السجل الأكاديمي" status={copy.slots[1][0]} note={copy.slots[1][1]} />
-        {(state === 'idle' || state === 'unreadable') && (
-          <button type="button" className="link">{state === 'idle' ? 'وين ألقاهم في البوابة؟' : 'كيف أنزّله PDF من البوابة؟'}</button>
-        )}
+        <Slot number="١" title={REPORT} status={copy.slots[0][0]} note={copy.slots[0][1]} />
+        <Slot number="٢" title={TRANSCRIPT} status={copy.slots[1][0]} note={copy.slots[1][1]} />
+        {(shown === 'idle' || shown === 'unreadable') && <button type="button" className="link">{shown === 'idle' ? 'وين ألقاهم في البوابة؟' : 'كيف أنزّلهم PDF من البوابة؟'}</button>}
       </div>
 
       <div className="footer">
-        {state === 'loading' ? (
+        {shown === 'loading' ? (
           <div className="btn btn--loading" role="status">
             <Spinner />
             نقرأ… ثواني
           </div>
         ) : (
-          <Link to="/upload?state=loading" className="btn btn--primary">
-            {state === 'idle' && (
-              <>
-                <UploadIcon />
-                اختر الملفين
-              </>
-            )}
-            {(state === 'unreadable' || state === 'missing') && (state === 'unreadable' ? 'اختر السجل الأكاديمي من جديد' : 'اختر السجل الأكاديمي')}
-            {state === 'offline' && 'جرّب مرة ثانية'}
-          </Link>
+          <button type="button" className="btn btn--primary" onClick={primaryAction}>
+            {shown === 'idle' && <UploadIcon />}
+            {copy.retry ?? 'اختر الملفين'}
+          </button>
         )}
-        {state === 'idle' && <Link to="/confirm" className="btn btn--secondary">ما عندي الملفات، بحددها بيدي</Link>}
-        {(state === 'unreadable' || state === 'missing') && <Link to="/confirm" className="btn btn--secondary">كمّل بدونه وحدد درجاتك بيدك</Link>}
+        {/* [?] شاشة الإدخال اليدوي ما انبنت للحين، فنخلي الرابط في صفحات التجربة بس */}
+        {demoState === 'idle' && <Link to="/confirm" className="btn btn--secondary">ما عندي الملفات، بحددها بيدي</Link>}
       </div>
     </main>
   )
