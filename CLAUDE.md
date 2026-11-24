@@ -12,7 +12,7 @@ Must stories (updated by the design decisions in HANDOFF.md §10):
 Should/Could, now in scope: choose university requirements to fill the remaining hours; save the plan as an image.
 
 Out of scope: section details (CRNs, times, instructors, rooms), schedule conflicts, university portal login/integration, OCR of scanned PDFs, multiple majors or colleges, the very old plans F–H, chat with advisors, any AI feature, real-time features.
-Current phase: **front end on mock data only**. PDF parsing, Supabase and image export come with the backend.
+Current phase: **backend, step 1 (auth)**. The front end is done on mock data; student progress is in `web/src/lib/progressStore.js` (localStorage) until the database replaces it. PDF parsing and image export come later.
 If I ask for anything out of scope, say so before building it.
 
 ## Design
@@ -83,7 +83,7 @@ ershodani/
 
 ## Build order
 1. Screens on mock data, one at a time (checklist → eligible list → GPA form). Logic + tests first for each.
-2. Backend and data, one feature at a time (auth → passed courses → GPA inputs).
+2. Backend and data, one feature at a time (auth → student courses and plan → GPA inputs).
 3. Connect each screen to real data, one at a time.
 
 ## Deployment
@@ -108,7 +108,11 @@ Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel project settings.
 ## Data rules
 - Schema lives only in `supabase/migrations/`, changed only by new numbered migration files in git (run them in the Supabase SQL Editor in order). Never edit tables by hand in the dashboard.
 - Row Level Security ON for every table. Policies: a user can only select/insert/update/delete rows where `user_id = auth.uid()`.
-- Planned tables: `passed_courses (user_id, course_code)`, `gpa_inputs (user_id, current_gpa, completed_hours, planned_hours, target_gpa)`.
+- Tables (approved 2026-11-24, see `supabase/migrations/0001_init.sql`). Every table has `id`, `user_id`, `created_at`, `updated_at`:
+  - `student_courses (course_code, grade, marked_passed, term)`: one row per course in the student's transcript. Replaces the earlier `passed_courses` because the plan needs the grade (failed, withdrawn, in progress). Unique per `(user_id, course_code)`.
+  - `plans (current_level, level_courses, mandatory_university, requirement_groups, cumulative_gpa, earned_hours, chosen_electives, report_read_at)`: one row per student, from the remaining-courses report plus their choices.
+  - `gpa_inputs (current_gpa, completed_hours, planned_hours, target_gpa)`: one row per student; `null` means "use the value from my files".
+- Never store the PDFs, the full name, the student ID or the birth year. Computed results (late, locked, total hours, required GPA) are never stored.
 - Select only the columns you need. Paginate any list that can grow.
 
 ## Auth rules

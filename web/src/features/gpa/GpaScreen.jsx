@@ -11,13 +11,26 @@ const STEP = 0.25
 // كل الأرقام تجي من ملفاته، بس الطالب يقدر يعدّلها بيده.
 // نحفظها كنص (string) عشان يقدر يكتب «٣٫» وهو في نص الكتابة بدون ما يتلخبط.
 export default function GpaScreen() {
-  const { student, chosenElectives } = useStudent()
+  const { student, chosenElectives, gpaInputs, setGpaInputs } = useStudent()
   const fromFiles = {
     current: ar(student.summary.cumulativeGpa, 2),
     earned: ar(student.summary.earnedHours),
     planned: ar(buildPlan({ student, chosenElectives }).totalHours),
   }
-  const [form, setForm] = useState({ ...fromFiles, target: ar(4, 2) })
+  // نبدأ من المحفوظ، واللي ما انحفظ ناخذه من الملفات.
+  const [form, setFormState] = useState({
+    current: gpaInputs?.current ?? fromFiles.current,
+    earned: gpaInputs?.earned ?? fromFiles.earned,
+    planned: gpaInputs?.planned ?? fromFiles.planned,
+    target: gpaInputs?.target ?? ar(4, 2),
+  })
+
+  // كل تعديل ينحفظ. الحقل اللي يساوي رقم الملفات نحفظه null عشان يتحدّث لو تغيّرت الملفات.
+  function setForm(next) {
+    setFormState(next)
+    const keep = (k) => (next[k] === fromFiles[k] ? null : next[k])
+    setGpaInputs({ current: keep('current'), earned: keep('earned'), planned: keep('planned'), target: next.target })
+  }
   const edited = form.current !== fromFiles.current || form.earned !== fromFiles.earned || form.planned !== fromFiles.planned
 
   const current = parseNumber(form.current)

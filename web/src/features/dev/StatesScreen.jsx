@@ -1,10 +1,10 @@
 import { Link } from 'react-router'
 import { LogoLockup } from '../../components/Logo.jsx'
+import { useStudent } from '../courses/StudentContext.jsx'
+import { useAuth } from '../auth/AuthContext.jsx'
 
 // صفحة للتجربة بس: روابط لكل حالة. نشيلها قبل النشر.
 const LINKS = [
-  ['الدخول', '/login'],
-  ['الدخول · خطأ', '/login?state=error'],
   ['ارفع ملفاتك', '/upload'],
   ['ارفع · تحميل', '/upload?state=loading'],
   ['ارفع · ما انقرأ', '/upload?state=unreadable'],
@@ -28,10 +28,15 @@ const LINKS = [
 ]
 
 export default function StatesScreen() {
+  const { resetProgress } = useStudent()
+  const { user, signOut } = useAuth()
   return (
     <main className="screen">
       <header className="header"><LogoLockup /></header>
       <h1 className="title">كل الشاشات والحالات</h1>
+      <p className="caption muted">داخل بـ <bdi dir="ltr">{user?.email}</bdi></p>
+      <button type="button" className="link" onClick={resetProgress}>امسح البيانات المحفوظة في المتصفح</button>
+      <button type="button" className="link" onClick={signOut}>اطلع من حسابك</button>
       <nav className="stack" style={{ gap: 0 }}>
         {LINKS.map(([label, to]) => (
           <Link key={to} to={to} className="row">{label}</Link>
