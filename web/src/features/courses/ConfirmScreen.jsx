@@ -1,9 +1,10 @@
+import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { BackHeader, Steps } from '../../components/BackHeader.jsx'
 import { CheckIcon, ChevronDownIcon } from '../../components/Icons.jsx'
 import { useStudent } from './StudentContext.jsx'
 import { gradeStatus } from './plan.js'
-import { courseName } from '../../data/studyPlan.js'
+import { courseName, EQUIVALENTS } from '../../data/studyPlan.js'
 import { ar, courseCode, coursesCount } from '../../lib/format.js'
 
 const REASON = { failed: 'لم تتجاوزها', withdrawn: 'حذفتها' }
@@ -13,7 +14,9 @@ export default function ConfirmScreen() {
   const [params] = useSearchParams()
   const { student, hasRecord, markedPassed, setMarkedPassed } = useStudent()
 
+  const [showPassed, setShowPassed] = useState(false)
   const notPassed = student.transcript.filter((t) => ['failed', 'withdrawn'].includes(gradeStatus(t.grade)))
+  const passed = student.transcript.filter((t) => gradeStatus(t.grade) === 'passed')
   // البيانات الحقيقية تحسب «لا، خلصتها» من نفسها؛ الطالب الوهمي لا.
   const passedCount = hasRecord ? student.summary.passedCount : student.summary.passedCount + markedPassed.length
   const isEmpty = params.get('state') === 'empty' || (hasRecord && passedCount === 0)
@@ -56,11 +59,26 @@ export default function ConfirmScreen() {
           />
 
           <div className="grow stack stack--2">
-            <button type="button" className="btn btn--secondary" aria-expanded="false" style={{ justifyContent: 'flex-start', paddingInline: 'var(--space-2)', border: 0, background: 'var(--color-surface)', height: 'var(--size-button)' }}>
+            <button type="button" className="btn btn--secondary" aria-expanded={showPassed} aria-controls="passed-list" onClick={() => setShowPassed(!showPassed)} style={{ justifyContent: 'flex-start', paddingInline: 'var(--space-2)', border: 0, background: 'var(--color-surface)', height: 'var(--size-button)' }}>
               <span className="bold">خلصتها</span>
               <span className="muted" style={{ fontWeight: 400 }}>{coursesCount(passedCount)} · {ar(student.summary.earnedHours)} ساعة</span>
-              <span className="row__end"><ChevronDownIcon /></span>
+              <span className="row__end" style={{ display: 'flex', transform: showPassed ? 'rotate(180deg)' : undefined }}><ChevronDownIcon /></span>
             </button>
+
+            {/* القائمة اللي يأكدها الطالب: كل مادة تجاوزها، باسمها ورمزها وتقديره. */}
+            {showPassed && (
+              <section id="passed-list" className="card card--flush" aria-label="مواد خلصتها">
+                {passed.map((t) => (
+                  <div key={t.course} className="row row--pad" style={{ paddingInline: 'var(--space-2)' }}>
+                    <span className="row__main">
+                      <span>{courseName(EQUIVALENTS[t.course] ?? t.course)}</span>
+                      <span className="caption muted">{courseCode(t.course)}</span>
+                    </span>
+                    <span className="row__end caption muted">{t.grade}</span>
+                  </div>
+                ))}
+              </section>
+            )}
 
             {notPassed.length > 0 && (
               <section className="card card--flush" aria-label="مواد ما خلصتها">
