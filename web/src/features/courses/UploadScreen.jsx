@@ -7,7 +7,7 @@ import { readPortalFiles } from '../upload/readFiles.js'
 import { useStudent } from './StudentContext.jsx'
 
 // الطالب يختار الملفين مع بعض. نقرأهم في المتصفح (ما يطلعون من الجوال)، ونحفظ قائمة المواد بس.
-// روابط التجربة: ?state=loading | unreadable | missing | offline
+// روابط التجربة: ?state=loading | unreadable | missing | offline | other_major
 
 function Slot({ number, title, note, status }) {
   const cls = { done: 'slot slot--done', error: 'slot slot--error', missing: 'slot slot--missing', loading: 'slot slot--done' }[status] ?? 'slot'
@@ -59,6 +59,14 @@ function copyFor(status, info = {}) {
         retry: needReport ? `اختر ${REPORT}` : `اختر ${TRANSCRIPT}`,
       }
     }
+    case 'other_major':
+      return {
+        eyebrow: 'لسه ما وصلنا تخصصك',
+        title: 'ارشدني الحين لطلاب نظم المعلومات',
+        body: `ملفك لتخصص «${info.major ?? 'علوم الحاسب'}». الموقع الحين لطلاب النظم بس، وبنوسّعه لتخصصات ثانية قريب. ملفاتك ما انحفظت.`,
+        slots: [['idle', 'لطلاب نظم المعلومات'], ['idle', 'لطلاب نظم المعلومات']],
+        retry: 'اختر ملفات ثانية',
+      }
     case 'offline':
       return {
         eyebrow: 'وقف الحفظ في النص',
@@ -89,7 +97,7 @@ export default function UploadScreen() {
 
   const shown = demoState ?? status
   const copy = copyFor(shown, info)
-  const isError = ['unreadable', 'missing', 'offline'].includes(shown)
+  const isError = ['unreadable', 'missing', 'offline', 'other_major'].includes(shown)
 
   async function save(parsed) {
     setStatus('loading')
@@ -106,7 +114,8 @@ export default function UploadScreen() {
     try {
       const result = await readPortalFiles(files, kept.current)
       if (!result.ok) {
-        if (result.found) kept.current = result.found
+        // تخصص ثاني: ننسى أي ملف وصل قبل، عشان ما يختلط.
+        kept.current = result.problem === 'other_major' ? {} : (result.found ?? kept.current)
         setInfo(result)
         setStatus(result.problem)
         return

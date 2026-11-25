@@ -1,6 +1,7 @@
 // من الملفين اللي اختارهم الطالب ← بيانات جاهزة، أو خطأ واضح نعرضه.
 import { readPdfPages, PdfError } from '../../lib/pdfText.js'
 import { detectKind } from './rows.js'
+import { detectMajor, isInformationSystems } from './major.js'
 import { parseReport } from './parseReport.js'
 import { parseTranscript } from './parseTranscript.js'
 
@@ -23,6 +24,9 @@ export async function readPortalFiles(fileList, previous = {}) {
     }
     const kind = detectKind(pages)
     if (kind === 'unknown') return { ok: false, problem: 'unreadable', fileName: file.name, reason: 'unknown' }
+    // تخصص ثاني؟ نوقف هنا وما نحفظ شي.
+    const major = detectMajor(pages, kind)
+    if (major && !isInformationSystems(major)) return { ok: false, problem: 'other_major', major }
     found[kind] = pages
   }
 

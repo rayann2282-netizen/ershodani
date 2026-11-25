@@ -5,7 +5,12 @@ vi.mock('../../lib/pdfText.js', () => ({
   PdfError: class extends Error {},
   readPdfPages: async (file) => [{ kind: file.name }],
 }))
-vi.mock('./rows.js', () => ({ detectKind: (pages) => pages[0].kind }))
+vi.mock('./rows.js', () => ({ detectKind: (pages) => pages[0].kind.replace('_cs', '') }))
+// ملف اسمه ينتهي بـ «_cs» = طالب علوم حاسب (مخترع).
+vi.mock('./major.js', () => ({
+  detectMajor: (pages) => (pages[0].kind.endsWith('_cs') ? 'علوم الحاسب' : 'نظم المعلومات'),
+  isInformationSystems: (major) => major === 'نظم المعلومات',
+}))
 vi.mock('./parseReport.js', () => ({ parseReport: () => ({ courses: [] }) }))
 vi.mock('./parseTranscript.js', () => ({ parseTranscript: () => ({ transcript: [{ course: 'نال 1130', grade: 'ب' }], summary: {} }) }))
 
@@ -24,5 +29,10 @@ describe('readPortalFiles', () => {
 
     const second = await readPortalFiles([file('remaining_report')], first.found)
     expect(second.ok).toBe(true)
+  })
+
+  it('stops another major with its name, before reading anything else', async () => {
+    const result = await readPortalFiles([file('transcript_cs'), file('remaining_report')])
+    expect(result).toEqual({ ok: false, problem: 'other_major', major: 'علوم الحاسب' })
   })
 })
