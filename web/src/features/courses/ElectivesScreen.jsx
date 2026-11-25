@@ -14,10 +14,10 @@ export default function ElectivesScreen() {
   const [params] = useSearchParams()
   const state = params.get('state')
   const navigate = useNavigate()
-  const { student, chosenElectives, setChosenElectives, maxHours } = useStudent()
+  const { student, chosenElectives, setChosenElectives, maxHours, removed } = useStudent()
 
   // الساعات المتاحة = الحد ناقص الخطة بدون متطلبات.
-  const basePlan = buildPlan({ student, maxHours })
+  const basePlan = buildPlan({ student, maxHours, deferred: removed })
   const cap = basePlan.remainingHours
   const groups = state === 'empty' ? [] : openGroups(student.groups)
   const doneGroups = student.groups.filter((g) => g.passed >= g.required).map((g) => ar(g.name))

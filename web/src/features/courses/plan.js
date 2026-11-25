@@ -129,3 +129,23 @@ export const LOADS = [
 ]
 export const DEFAULT_LOAD = 'heavy'
 export const loadHours = (key) => (LOADS.find((l) => l.key === key) ?? LOADS.find((l) => l.key === DEFAULT_LOAD)).hours
+
+// لو شال الطالب مادة من خطته: وش المواد اللي بتتقفل عليه بسببها؟
+// كل مادة متطلبها هذي المادة، وبعدها اللي متطلبها هذيك (سلسلة)، ما عدا اللي خلّصها.
+// مرتبة: اللي تتقفل مباشرة أول، بعدها اللي وراها.
+export function locksIfRemoved(key, student, courses = COURSES) {
+  const status = latestStatusByCourse(student.transcript)
+  const locked = []
+  const queue = [key]
+  while (queue.length > 0) {
+    const current = queue.shift()
+    for (const [course, info] of Object.entries(courses)) {
+      if (course === key || locked.includes(course) || status[course] === 'passed') continue
+      if (info.prereqs.includes(current)) {
+        locked.push(course)
+        queue.push(course)
+      }
+    }
+  }
+  return locked
+}

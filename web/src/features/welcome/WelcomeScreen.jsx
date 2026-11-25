@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { LogoLockup } from '../../components/Logo.jsx'
 import { SignOutLink } from '../auth/SignOutLink.jsx'
+import { MenuButton } from '../../components/Menu.jsx'
 import { markWelcomed } from './welcomed.js'
 
 // أول مرة يدخل: ٣ خطوات تشرح الموقع في ٥ ثواني، وبعدها يروح للرفع.
@@ -15,6 +16,7 @@ export default function WelcomeScreen() {
     <main className="screen screen--roomy">
       <header className="header">
         <LogoLockup />
+        <div className="header__end"><MenuButton /></div>
       </header>
 
       <div className="stack">

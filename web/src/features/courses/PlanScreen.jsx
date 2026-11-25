@@ -3,9 +3,9 @@ import { Link, Outlet, useLocation, useSearchParams } from 'react-router'
 import { LogoLockup } from '../../components/Logo.jsx'
 import { BackHeader } from '../../components/BackHeader.jsx'
 import { SignOutLink } from '../auth/SignOutLink.jsx'
-import { AlertIcon, CheckIcon, LockIcon, Spinner } from '../../components/Icons.jsx'
+import { AlertIcon, CheckIcon, CloseIcon, LockIcon, Spinner } from '../../components/Icons.jsx'
 import { useStudent } from './StudentContext.jsx'
-import { LOADS, buildPlan } from './plan.js'
+import { LOADS, buildPlan, locksIfRemoved } from './plan.js'
 import { studentForState } from '../../data/mockStudents.js'
 import { MAX_HOURS, courseName } from '../../data/studyPlan.js'
 import { ar, coursesCount, courseCode, hoursCount, hoursShort } from '../../lib/format.js'
@@ -37,7 +37,10 @@ export default function PlanScreen() {
 
   const student = DATA_STATES.includes(state) ? studentForState(state) : ctx.student
   const chosen = state === 'full' ? FULL_ELECTIVES : ctx.chosenElectives
-  const [deferred, setDeferred] = useState([])
+  // المواد اللي شالها (هو أو بزر «أجّلها»). محفوظة في StudentContext عشان المعدل والمتطلبات يشوفونها.
+  const deferred = ctx.removed
+  const setDeferred = ctx.setRemoved
+  const [confirmRemove, setConfirmRemove] = useState(null) // المادة اللي ينتظر تأكيد شيلها
   const plan = buildPlan({ student, chosenElectives: chosen, deferred, maxHours: ctx.maxHours })
 
   // حفظ الصورة: idle ← loading ← done (أو error).
@@ -147,6 +150,7 @@ export default function PlanScreen() {
                 <span className="bold">{courseName(c.key)}</span>
                 <span className="badge">أولوية</span>
                 <span className="row__end">{hoursShort(c.hours)}</span>
+<RemoveButton name={courseName(c.key)} onClick={() => setConfirmRemove(c.key)} />
               </div>
               <div className="caption soft">{LATE_REASON[c.reason]}</div>
               <div className="chain" aria-label={`قفلت عليك: ${c.locks.map(courseName).join('، ')}`}>
@@ -167,6 +171,7 @@ export default function PlanScreen() {
               </span>
               {plan.deferSuggestion === c.key && <span className="caption warn semibold">نقترح تأجيلها</span>}
               <span className="row__end">{hoursShort(c.hours)}</span>
+<RemoveButton name={courseName(c.key)} onClick={() => setConfirmRemove(c.key)} />
             </div>
           ),
         )}
@@ -187,6 +192,7 @@ export default function PlanScreen() {
                   </span>
                   {plan.deferSuggestion === c.key && <span className="caption warn semibold">نقترح تأجيلها</span>}
                   <span className="row__end">{hoursShort(c.hours)}</span>
+<RemoveButton name={courseName(c.key)} onClick={() => setConfirmRemove(c.key)} />
                 </div>
               ))}
           </div>
@@ -198,6 +204,7 @@ export default function PlanScreen() {
             <span>{courseName(c.key)}</span>
             {plan.deferSuggestion === c.key && <span className="caption warn semibold">نقترح تأجيلها</span>}
             <span className="row__end">{hoursShort(c.hours)}</span>
+<RemoveButton name={courseName(c.key)} onClick={() => setConfirmRemove(c.key)} />
           </div>
         ))}
 
@@ -218,6 +225,21 @@ export default function PlanScreen() {
           </Link>
         ))}
       </div>
+
+      {/* اللي شالها: يقدر يرجّعها بضغطة. ما تطلع في صورة الخطة. */}
+      {deferred.length > 0 && (
+        <section className="card" data-no-capture aria-label="مواد شلتها من خطتك">
+          <span className="bold">شلتها من خطتك</span>
+          {deferred.map((key) => (
+            <div key={key} className="row" style={{ borderBlockEnd: 0, minHeight: 0 }}>
+              <span className="muted">{courseName(key)}</span>
+              <button type="button" className="link row__end" onClick={() => setDeferred(deferred.filter((k) => k !== key))}>
+                رجّعها
+              </button>
+            </div>
+          ))}
+        </section>
+      )}
 
       {save === 'error' && (
         <div role="alert" className="alert" data-no-capture>
@@ -267,6 +289,19 @@ export default function PlanScreen() {
         )}
         <SignOutLink />
       </div>
+
+      {/* «متأكد تشيلها؟» مع المواد اللي بتتقفل عليه بسببها */}
+      {confirmRemove && (
+        <ConfirmRemoveSheet
+          courseKey={confirmRemove}
+          locks={locksIfRemoved(confirmRemove, student)}
+          onCancel={() => setConfirmRemove(null)}
+          onConfirm={() => {
+            setDeferred([...deferred, confirmRemove])
+            setConfirmRemove(null)
+          }}
+        />
+      )}
 
       {/* نافذة «مادة مقفلة» تطلع هنا فوق الخطة */}
       <Outlet context={{ plan, student }} />
@@ -318,5 +353,54 @@ function PlanEmpty() {
         <Link to="/gpa" className="btn btn--secondary">احسب معدلك النهائي</Link>
       </div>
     </main>
+  )
+}
+
+// زر ✕ صغير آخر صف المادة: يفتح «متأكد؟» قبل ما يشيلها.
+function RemoveButton({ name, onClick }) {
+  return (
+    <button type="button" className="remove-btn" aria-label={`شيل ${name} من خطتك`} onClick={onClick} data-no-capture>
+      <CloseIcon />
+    </button>
+  )
+}
+
+// نافذة من تحت: «متأكد تشيل X؟» + المواد اللي بتتقفل. الزر الأساسي «لا، خلّها» لأنه الأأمن.
+const SHOW_LOCKS = 6
+function ConfirmRemoveSheet({ courseKey, locks, onCancel, onConfirm }) {
+  const name = courseName(courseKey)
+  return (
+    <div className="scrim" onClick={onCancel}>
+      <section role="alertdialog" aria-modal="true" aria-label={`متأكد تشيل ${name}؟`} className="sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet__handle" />
+        <h2 className="title">متأكد تشيل «{name}»؟</h2>
+
+        {locks.length > 0 ? (
+          <>
+            <p className="warn">لو شلتها، بتتقفل عليك {coursesCount(locks.length)} لين تخلّصها:</p>
+            <div className="inset">
+              {locks.slice(0, SHOW_LOCKS).map((k, i, shown) => (
+                <div key={k} className="row" style={{ paddingInline: 'var(--space-2)', borderBlockEnd: i === shown.length - 1 ? 0 : undefined }}>
+                  <LockIcon />
+                  <span>{courseName(k)}</span>
+                  <span className="row__end caption muted">{courseCode(k)}</span>
+                </div>
+              ))}
+              {locks.length > SHOW_LOCKS && (
+                <div className="caption muted" style={{ padding: 'var(--space-1) var(--space-2)' }}>وغيرها {coursesCount(locks.length - SHOW_LOCKS)}</div>
+              )}
+            </div>
+            <p className="soft caption">يعني ممكن تتأخر عن التخرج. تقدر ترجّعها بعدين من «شلتها من خطتك».</p>
+          </>
+        ) : (
+          <p className="soft">ما تقفل عليك ولا مادة، بس بتحتاج تسجّلها ترم ثاني. تقدر ترجّعها بعدين من «شلتها من خطتك».</p>
+        )}
+
+        <div className="stack">
+          <button type="button" className="btn btn--primary" onClick={onCancel} autoFocus>لا، خلّها</button>
+          <button type="button" className="btn btn--secondary warn" onClick={onConfirm}>إيه، شيلها</button>
+        </div>
+      </section>
+    </div>
   )
 }

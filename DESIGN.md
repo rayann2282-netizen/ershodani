@@ -152,6 +152,12 @@ None. Depth comes from `surface` on `bg`. Focus: `outline: 2px solid #2EC4B6; ou
 ### Tab bar
 - Not used. The flow is linear; navigation is the back arrow plus links.
 
+### Menu (added 2026-11-25)
+- ☰ `icon-btn` at the far end (left) of every header after sign-in, next to the logo tile. Opens a drawer from that side: `surface`, width min(300px, 85%), over a `scrim`. Links are 48h rows, 16/600; the current page is `accent` with `on-accent` text. Pages that need the files are hidden until the student uploads them. Closes with ✕, Escape, a tap outside, or a link.
+
+### Remove a course (added 2026-11-25)
+- Small ✕ (48×48, icon 18px, `text-2`) at the end of each plan row. It opens a bottom sheet: «متأكد تشيل «X»؟», the courses it would lock (lock icon rows in an `inset`, up to 6, then «وغيرها …»), primary «لا، خلّها» (the safe choice) and secondary «إيه، شيلها» in `warning`. Removed courses sit in a «شلتها من خطتك» card with «رجّعها». Neither the ✕ nor that card appears in the plan image.
+
 ## 7. Motion — one idea
 
 «احفظ خطتي صورة»:

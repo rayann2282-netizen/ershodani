@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router'
 import { BackIcon } from '../../components/Icons.jsx'
 import { LogoTile } from '../../components/Logo.jsx'
+import { MenuButton } from '../../components/Menu.jsx'
 
 // صفحة الخصوصية: وش نقرأ، وش نحفظ، ووش ما نحفظ أبدًا.
 // مفتوحة للكل (بدون دخول)، وقوقل يطلب رابطها عشان ننشر الدخول بقوقل.
@@ -41,6 +42,7 @@ export default function PrivacyScreen() {
         <span className="muted">رجوع</span>
         <div className="header__end">
           <LogoTile alone />
+          <MenuButton />
         </div>
       </header>
 

@@ -119,7 +119,25 @@ export function StudentProvider({ children }) {
     }
   }
 
-  const value = { student, hasRecord: Boolean(record), loaded, chosenElectives, setChosenElectives, markedPassed, setMarkedPassed, gpaInputs, setGpaInputs, resetProgress, applyUpload, load, setLoad, maxHours: loadHours(load) }
+  // المواد اللي شالها من خطته بنفسه (بعد ما أكّد). نفس فكرة الحمل: في المتصفح، لكل حساب.
+  const [removed, setRemovedState] = useState([])
+  useEffect(() => {
+    try {
+      setRemovedState(JSON.parse(localStorage.getItem(`ershodani.removed.${userId}`) ?? '[]'))
+    } catch {
+      setRemovedState([])
+    }
+  }, [userId])
+  function setRemoved(next) {
+    setRemovedState(next)
+    try {
+      localStorage.setItem(`ershodani.removed.${userId}`, JSON.stringify(next))
+    } catch {
+      // المتصفح ما سمح بالحفظ: يبقى لين يسكّر الصفحة
+    }
+  }
+
+  const value = { student, hasRecord: Boolean(record), loaded, chosenElectives, setChosenElectives, markedPassed, setMarkedPassed, gpaInputs, setGpaInputs, resetProgress, applyUpload, load, setLoad, maxHours: loadHours(load), removed, setRemoved }
   // ما نعرض الشاشات قبل ما نقرأ المحفوظ، عشان ما تبدأ فاضية وبعدين تتغيّر.
   return <StudentContext.Provider value={value}>{loaded ? children : null}</StudentContext.Provider>
 }

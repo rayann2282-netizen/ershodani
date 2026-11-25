@@ -11,11 +11,11 @@ const STEP = 0.25
 // كل الأرقام تجي من ملفاته، بس الطالب يقدر يعدّلها بيده.
 // نحفظها كنص (string) عشان يقدر يكتب «٣٫» وهو في نص الكتابة بدون ما يتلخبط.
 export default function GpaScreen() {
-  const { student, chosenElectives, gpaInputs, setGpaInputs, maxHours } = useStudent()
+  const { student, chosenElectives, gpaInputs, setGpaInputs, maxHours, removed } = useStudent()
   const fromFiles = {
     current: ar(student.summary.cumulativeGpa ?? 0, 2),
     earned: ar(student.summary.earnedHours),
-    planned: ar(buildPlan({ student, chosenElectives, maxHours }).totalHours),
+    planned: ar(buildPlan({ student, chosenElectives, maxHours, deferred: removed }).totalHours),
   }
   // نبدأ من المحفوظ، واللي ما انحفظ ناخذه من الملفات.
   const [form, setFormState] = useState({

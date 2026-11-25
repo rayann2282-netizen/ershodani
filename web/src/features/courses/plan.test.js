@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildPlan, gradeStatus, openGroups, loadHours } from './plan.js'
+import { buildPlan, gradeStatus, openGroups, loadHours, locksIfRemoved } from './plan.js'
 import { demoStudent, studentForState } from '../../data/mockStudents.js'
 
 describe('gradeStatus', () => {
@@ -153,5 +153,22 @@ describe('loads', () => {
     const plan = buildPlan({ student: demoStudent, maxHours: loadHours('light') })
     expect(plan.overBy).toBeGreaterThan(0)
     expect(plan.maxHours).toBe(12)
+  })
+})
+
+describe('locksIfRemoved', () => {
+  it('lists the courses a removed course would lock, direct ones first', () => {
+    // كفاءات الإدارة (نال 1200) متطلب لعلاقات الأعمال (نال 1290).
+    const locks = locksIfRemoved('نال 1200', { transcript: [] })
+    expect(locks[0]).toBe('نال 1290')
+  })
+
+  it('skips courses the student already passed', () => {
+    const locks = locksIfRemoved('نال 1200', { transcript: [{ course: 'نال 1290', grade: 'ب' }] })
+    expect(locks).not.toContain('نال 1290')
+  })
+
+  it('locks nothing for a course that is no one’s prerequisite', () => {
+    expect(locksIfRemoved('ذاع 1001', { transcript: [] })).toEqual([])
   })
 })

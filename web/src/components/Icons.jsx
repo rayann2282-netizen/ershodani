@@ -50,6 +50,19 @@ export const WifiOffIcon = () => (
   </svg>
 )
 
+// ثلاث خطوط: زر القائمة.
+export const MenuIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" {...base}>
+    <path d="M4 7h16M4 12h16M4 17h16" />
+  </svg>
+)
+
+export const CloseIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" {...base}>
+    <path d="M6 6l12 12M18 6 6 18" />
+  </svg>
+)
+
 // شعار قوقل بألوانه الرسمية (ألوان العلامة نفسها، مو من tokens.css).
 export const GoogleIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true">

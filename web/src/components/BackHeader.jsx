@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { BackIcon } from './Icons.jsx'
 import { LogoTile } from './Logo.jsx'
+import { MenuButton } from './Menu.jsx'
 
 // رأس الشاشات اللي فيها رجوع: السهم يمين، والشعار يسار.
 // `children` هو اللي يجي في النص (مثل «خطتك» أو شريط التقدم).
@@ -13,6 +14,7 @@ export function BackHeader({ to, label = 'رجوع', children }) {
       {children}
       <div className="header__end">
         <LogoTile alone />
+        <MenuButton />
       </div>
     </header>
   )

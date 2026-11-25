@@ -5,6 +5,7 @@ import { BackHeader, Steps } from '../../components/BackHeader.jsx'
 import { AlertIcon, CheckIcon, Spinner, UploadIcon, WifiOffIcon } from '../../components/Icons.jsx'
 import { readPortalFiles } from '../upload/readFiles.js'
 import { SignOutLink } from '../auth/SignOutLink.jsx'
+import { MenuButton } from '../../components/Menu.jsx'
 import { hasBeenWelcomed } from '../welcome/welcomed.js'
 import { useStudent } from './StudentContext.jsx'
 
@@ -151,6 +152,7 @@ export default function UploadScreen() {
       ) : (
         <header className="header">
           <LogoLockup />
+          <div className="header__end"><MenuButton /></div>
         </header>
       )}
       <Steps step={1} percent={{ idle: 50, loading: 75, offline: 62 }[shown] ?? 50} />
