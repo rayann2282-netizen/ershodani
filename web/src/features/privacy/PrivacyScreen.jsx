@@ -1,11 +1,11 @@
-import { Link, useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { BackIcon } from '../../components/Icons.jsx'
 import { LogoTile } from '../../components/Logo.jsx'
 import { MenuButton } from '../../components/Menu.jsx'
 
 // صفحة الخصوصية: وش نقرأ، وش نحفظ، ووش ما نحفظ أبدًا.
 // مفتوحة للكل (بدون دخول)، وقوقل يطلب رابطها عشان ننشر الدخول بقوقل.
-const SECTIONS = [
+export const SECTIONS = [
   {
     title: 'ملفاتك ما تطلع من جوالك',
     body: 'نقرأ كشف المقررات المتبقية والسجل الأكاديمي داخل متصفحك. الملف نفسه ما ينرفع لأي مكان، ولا نحفظه.',
@@ -31,7 +31,9 @@ const SECTIONS = [
 export default function PrivacyScreen() {
   const navigate = useNavigate()
   // يرجع للصفحة اللي جاء منها، ولو فتح الرابط مباشرة يروح للدخول.
-  const goBack = () => (window.history.length > 1 ? navigate(-1) : navigate('/login'))
+  // location.key = 'default' يعني أول صفحة فتحها في الموقع (ما فيه صفحة قبلها عندنا).
+  const location = useLocation()
+  const goBack = () => (location.key !== 'default' ? navigate(-1) : navigate('/login'))
 
   return (
     <main className="screen">
@@ -52,17 +54,22 @@ export default function PrivacyScreen() {
       </div>
 
       <div className="stack stack--2 grow">
-        {SECTIONS.map((s) => (
-          <section key={s.title} className="card">
-            <h2 className="bold">{s.title}</h2>
-            <p className="caption muted">{s.body}</p>
-          </section>
-        ))}
+        <PrivacySections />
       </div>
 
       <div className="footer">
-        <Link to="/login" className="btn btn--secondary">ارجع للموقع</Link>
+        <button type="button" className="btn btn--secondary" onClick={goBack}>ارجع للموقع</button>
       </div>
     </main>
   )
+}
+
+// البطاقات نفسها: تُستخدم في صفحة الخصوصية، وفي النافذة اللي تطلع من صفحة الدخول.
+export function PrivacySections() {
+  return SECTIONS.map((s) => (
+    <section key={s.title} className="card">
+      <h2 className="bold">{s.title}</h2>
+      <p className="caption muted">{s.body}</p>
+    </section>
+  ))
 }

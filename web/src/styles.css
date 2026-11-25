@@ -822,3 +822,12 @@ button {
   font-size: var(--text-caption);
   text-decoration: none;
 }
+
+/* نافذة طويلة (الخصوصية من صفحة الدخول): ما تتعدى ٨٥٪ من الشاشة، والنص يتمرر داخلها. */
+.sheet--tall {
+  max-height: 85dvh;
+}
+.sheet__scroll {
+  overflow-y: auto;
+  min-height: 0;
+}

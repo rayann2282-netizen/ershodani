@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react
 import { LogoLockup } from '../../components/Logo.jsx'
 import { AlertIcon, GoogleIcon, Spinner } from '../../components/Icons.jsx'
 import { useAuth } from './AuthContext.jsx'
+import { PrivacySections } from '../privacy/PrivacyScreen.jsx'
 
 // شاشة وحدة للدخول وسوّ حساب: ?mode=signup يبدّلها.
 // ?state=error للتجربة بس (يعرض رسالة الخطأ بدون ما يكلم Supabase).
@@ -21,6 +22,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
+  const [showPrivacy, setShowPrivacy] = useState(false)
   const [accepted, setAccepted] = useState(() => {
     try {
       return localStorage.getItem(CONSENT_KEY) === '1'
@@ -104,15 +106,37 @@ export default function LoginScreen() {
           <label htmlFor="password">كلمة المرور</label>
           <input id="password" type="password" dir="ltr" autoComplete={isSignup ? 'new-password' : 'current-password'} required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} aria-invalid={fieldError} aria-describedby={fieldError ? 'login-error' : undefined} />
         </div>
-        {/* زر واضح تحت كلمة المرور: يقرأ الخصوصية والشروط قبل ما يوافق تحت. */}
-        <Link to="/privacy" className="btn btn--secondary privacy-btn">🔒 اقرأ الخصوصية والشروط</Link>
         {fieldError && (
           <div id="login-error" role="alert" className="eyebrow warn" style={{ fontWeight: 400, alignItems: 'flex-start' }}>
             <AlertIcon />
             <span>{error}</span>
           </div>
         )}
+        {/* زر واضح تحت الخانات: يفتح الخصوصية في نافذة فوق الصفحة نفسها،
+            عشان ما ينمسح الإيميل وكلمة المرور (لو رحنا لصفحة ثانية، الـ state ينمسح). */}
+        <button type="button" className="btn btn--secondary privacy-btn" disabled={busy} onClick={() => setShowPrivacy(true)}>
+          🔒 اقرأ الخصوصية والشروط
+        </button>
       </div>
+
+      {showPrivacy && (
+        <div className="scrim" onClick={() => setShowPrivacy(false)}>
+          <section role="dialog" aria-modal="true" aria-label="خصوصيتك" className="sheet sheet--tall" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet__handle" />
+            <h2 className="title">خصوصيتك</h2>
+            <div className="stack stack--2 sheet__scroll">
+              <PrivacySections />
+            </div>
+            <div className="stack">
+              {/* «أوافق» يحط الصح في المربع بداله. */}
+              <button type="button" className="btn btn--primary" autoFocus onClick={() => { toggleAccepted({ target: { checked: true } }); setShowPrivacy(false) }}>
+                قريتها وأوافق
+              </button>
+              <button type="button" className="btn btn--secondary" onClick={() => setShowPrivacy(false)}>سكّر</button>
+            </div>
+          </section>
+        </div>
+      )}
 
       <div className="footer">
         {/* الموافقة على الخصوصية: لازم قبل «ادخل» و«سوّ حسابي» و«قوقل». */}
