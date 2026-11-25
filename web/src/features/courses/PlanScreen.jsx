@@ -14,6 +14,7 @@ import { ar, coursesCount, courseCode, hoursCount, hoursShort } from '../../lib/
 const DATA_STATES = ['withdrawn', 'in-progress', 'full', 'empty']
 const FULL_ELECTIVES = ['ذاع 1001']
 const PLAN_IMAGE_NAME = 'ershodani-plan.png'
+const TARTEBAH_URL = 'https://trtebh.com/'
 
 const LATE_REASON = {
   failed: 'لم تتجاوزها · سجّلها هالترم عشان ما تتأخر',
@@ -258,6 +259,10 @@ export default function PlanScreen() {
             ) : (
               <Link to="/gpa" className="btn btn--secondary">احسب المعدل اللي تحتاجه</Link>
             )}
+            {/* بعد ما ضبط موادك وحملك: «ترتيبه» يرتب أوقات الشعب. موقع ثاني، ما نرسل له أي بيانات. */}
+            <a href={TARTEBAH_URL} target="_blank" rel="noopener noreferrer" className="btn btn--secondary">
+              رتّب جدولك في «ترتيبه» ↗
+            </a>
           </>
         )}
         <SignOutLink />
