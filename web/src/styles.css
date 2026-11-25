@@ -796,3 +796,23 @@ button {
 .remove-btn:active {
   background: var(--color-surface);
 }
+
+/* مربع «قريت الخصوصية وأوافق عليها» في صفحة الدخول. */
+.consent {
+  min-height: var(--size-row);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-caption);
+  color: var(--color-text-2);
+}
+.consent input {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  accent-color: var(--color-accent);
+}
+.consent a {
+  color: var(--color-text);
+  font-weight: 600;
+}

@@ -46,7 +46,12 @@ export function AuthProvider({ children }) {
   }
 
   async function signUp(email, password) {
-    const { data, error } = await supabase.auth.signUp({ email: email.trim(), password })
+    // نسجّل متى وافق على الخصوصية مع حسابه (user metadata في Supabase Auth، مو جدول عندنا).
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: { data: { privacy_accepted_at: new Date().toISOString() } },
+    })
     if (error) return messageFor(error)
     // «Confirm email» مقفل في Supabase، فالجلسة ترجع على طول.
     if (!data.session) return 'انسوّى الحساب، بس لازم تأكيد الإيميل. قفّل «Confirm email» في Supabase.'

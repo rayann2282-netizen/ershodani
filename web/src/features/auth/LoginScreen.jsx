@@ -8,6 +8,8 @@ import { useAuth } from './AuthContext.jsx'
 // ?state=error للتجربة بس (يعرض رسالة الخطأ بدون ما يكلم Supabase).
 const DEMO_ERROR = 'الإيميل أو كلمة المرور ما تطابق. تأكد إن لوحة المفاتيح إنجليزي.'
 const GOOGLE_ERROR = 'ما قدرنا ندخلك بقوقل. جرّب مرة ثانية، أو ادخل بإيميلك.'
+const CONSENT_ERROR = 'لازم تقرأ الخصوصية وتوافق عليها أول.'
+const CONSENT_KEY = 'ershodani.privacyAccepted'
 
 export default function LoginScreen() {
   const navigate = useNavigate()
@@ -19,6 +21,13 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
+  const [accepted, setAccepted] = useState(() => {
+    try {
+      return localStorage.getItem(CONSENT_KEY) === '1'
+    } catch {
+      return false
+    }
+  })
   const [error, setError] = useState(
     params.get('state') === 'error' ? DEMO_ERROR : params.get('error') ? GOOGLE_ERROR : null, // قوقل يرجّع ?error=… لو صار شي
   )
@@ -29,7 +38,27 @@ export default function LoginScreen() {
   const nextPath = (next?.startsWith('/') && !next.startsWith('//') ? next : null) ?? location.state?.from ?? '/upload'
   if (ready && user) return <Navigate to={nextPath} replace />
 
+  // لازم يوافق على الخصوصية قبل أي دخول (إيميل أو قوقل). لو وافق قبل من نفس الجوال، نتذكرها.
+  function needsConsent() {
+    if (accepted) return false
+    setError(CONSENT_ERROR)
+    return true
+  }
+  function toggleAccepted(event) {
+    setAccepted(event.target.checked)
+    if (event.target.checked) setError((e) => (e === CONSENT_ERROR ? null : e))
+    try {
+      localStorage.setItem(CONSENT_KEY, event.target.checked ? '1' : '0')
+    } catch {
+      // المتصفح ما سمح: بيسأله مرة ثانية بس
+    }
+  }
+
+  // خطأ الموافقة يطلع تحت المربع؛ الباقي (إيميل، كلمة مرور، قوقل) يطلع تحت الخانات.
+  const fieldError = Boolean(error) && error !== CONSENT_ERROR
+
   async function handleGoogle() {
+    if (needsConsent()) return
     setBusy(true)
     setError(null)
     const message = await signInWithGoogle(nextPath)
@@ -42,6 +71,7 @@ export default function LoginScreen() {
 
   async function handleSubmit(event) {
     event.preventDefault() // نمنع المتصفح يعيد تحميل الصفحة
+    if (needsConsent()) return
     setBusy(true)
     setError(null)
     const message = isSignup ? await signUp(email, password) : await signIn(email, password)
@@ -68,13 +98,13 @@ export default function LoginScreen() {
       <div className="stack stack--2">
         <div className="field">
           <label htmlFor="email">إيميلك</label>
-          <input id="email" type="email" dir="ltr" autoComplete="email" placeholder="name@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} aria-invalid={Boolean(error)} aria-describedby={error ? 'login-error' : undefined} />
+          <input id="email" type="email" dir="ltr" autoComplete="email" placeholder="name@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} aria-invalid={fieldError} aria-describedby={fieldError ? 'login-error' : undefined} />
         </div>
         <div className="field">
           <label htmlFor="password">كلمة المرور</label>
-          <input id="password" type="password" dir="ltr" autoComplete={isSignup ? 'new-password' : 'current-password'} required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} aria-invalid={Boolean(error)} aria-describedby={error ? 'login-error' : undefined} />
+          <input id="password" type="password" dir="ltr" autoComplete={isSignup ? 'new-password' : 'current-password'} required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} aria-invalid={fieldError} aria-describedby={fieldError ? 'login-error' : undefined} />
         </div>
-        {error && (
+        {fieldError && (
           <div id="login-error" role="alert" className="eyebrow warn" style={{ fontWeight: 400, alignItems: 'flex-start' }}>
             <AlertIcon />
             <span>{error}</span>
@@ -83,6 +113,19 @@ export default function LoginScreen() {
       </div>
 
       <div className="footer">
+        {/* الموافقة على الخصوصية: لازم قبل «ادخل» و«سوّ حسابي» و«قوقل». */}
+        <label className="consent">
+          <input type="checkbox" checked={accepted} onChange={toggleAccepted} aria-invalid={!fieldError && Boolean(error)} aria-describedby={!fieldError && error ? 'consent-error' : undefined} />
+          <span>
+            قريت <Link to="/privacy">الخصوصية</Link> وأوافق عليها
+          </span>
+        </label>
+        {!fieldError && error && (
+          <div id="consent-error" role="alert" className="eyebrow warn" style={{ fontWeight: 400 }}>
+            <AlertIcon />
+            <span>{error}</span>
+          </div>
+        )}
         <button type="submit" className={busy ? 'btn btn--loading' : 'btn btn--primary'} disabled={busy} aria-live="polite">
           {busy && <Spinner />}
           {busy ? (isSignup ? 'نسوّي حسابك…' : 'ندخلك…') : isSignup ? 'سوّ حسابي' : 'ادخل'}
@@ -97,7 +140,6 @@ export default function LoginScreen() {
         ) : (
           <Link to="/login?mode=signup" replace className="btn btn--text" state={location.state}>ما عندك حساب؟ سوّ حساب</Link>
         )}
-        <Link to="/privacy" className="link muted" style={{ alignSelf: 'center', marginInlineStart: 0 }}>خصوصيتك: وش نحفظ ووش ما نحفظ</Link>
       </div>
     </form>
   )
