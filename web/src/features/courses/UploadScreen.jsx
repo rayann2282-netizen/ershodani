@@ -50,13 +50,13 @@ function copyFor(status, info = {}) {
     case 'missing': {
       const needReport = info.missing === 'remaining_report'
       return {
-        eyebrow: 'اخترت ملف واحد بس',
+        eyebrow: 'وصل واحد، باقي واحد',
         title: needReport ? 'ناقصك الكشف' : 'ناقصك السجل',
         body: needReport
-          ? `وصلنا ${TRANSCRIPT}. نحتاج ${REPORT} بعد، عشان نعرف وش باقي عليك.`
-          : `وصلنا ${REPORT}. نحتاج ${TRANSCRIPT} بعد، عشان نضبطك بأحلى جدول`,
+          ? `وصلنا ${TRANSCRIPT}. اختر ${REPORT} الحين، عشان نعرف وش باقي عليك.`
+          : `وصلنا ${REPORT}. اختر ${TRANSCRIPT} الحين، عشان نضبطك بأحلى جدول.`,
         slots: needReport ? [['missing', 'ما وصل'], ['done', 'وصل']] : [['done', 'وصل'], ['missing', 'ما وصل']],
-        retry: 'اختر الملفين مع بعض',
+        retry: needReport ? `اختر ${REPORT}` : `اختر ${TRANSCRIPT}`,
       }
     }
     case 'offline':
@@ -70,7 +70,7 @@ function copyFor(status, info = {}) {
     default:
       return {
         title: 'ارفع الملفات',
-        body: 'من الخدمات الذاتية. اخترهم مع بعض، وإحنا نعرف كل واحد لحاله.',
+        body: 'من الخدمات الذاتية. اخترهم مع بعض أو واحد واحد، وإحنا نعرف كل واحد لحاله.',
         slots: [['idle', 'منه نعرف وش باقي عليك ومسارك'], ['idle', 'منه نعرف درجاتك ومعدلك']],
       }
   }
@@ -83,6 +83,7 @@ export default function UploadScreen() {
   const { applyUpload, hasRecord } = useStudent()
   const input = useRef(null)
   const lastParsed = useRef(null) // نحتفظ بالقراءة عشان «جرّب مرة ثانية» ما يحتاج يختار من جديد
+  const kept = useRef({}) // الملف اللي وصل لو اختار ملف ملف، نستناه لين يجي الثاني
   const [status, setStatus] = useState('idle')
   const [info, setInfo] = useState({})
 
@@ -103,12 +104,14 @@ export default function UploadScreen() {
     setStatus('loading')
     setInfo({})
     try {
-      const result = await readPortalFiles(files)
+      const result = await readPortalFiles(files, kept.current)
       if (!result.ok) {
+        if (result.found) kept.current = result.found
         setInfo(result)
         setStatus(result.problem)
         return
       }
+      kept.current = {}
       lastParsed.current = result
       await save(result)
     } catch (error) {

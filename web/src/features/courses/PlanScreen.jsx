@@ -193,7 +193,10 @@ export default function PlanScreen() {
                 أجّلها · تصير {ar(plan.totalHours - courseHoursOf(plan, plan.deferSuggestion))} ساعة
               </button>
             )}
-            <button type="button" className="btn btn--secondary">أختار بنفسي وش أشيل</button>
+            {/* يروح لـ«اختر متطلباتك» ويشيل اللي يبيه من هناك. لو ما اختار متطلبات، ما فيه شي يشيله بيده. */}
+            {plan.electives.length > 0 && (
+              <Link to={`/electives${location.search}`} className="btn btn--secondary">أختار بنفسي وش أشيل</Link>
+            )}
           </>
         ) : !state ? (
           // حفظ الصورة الحقيقي لسه ما انبنى، فما نعرض الزر للطالب عشان ما نقول «انحفظت» وهي ما انحفظت.
