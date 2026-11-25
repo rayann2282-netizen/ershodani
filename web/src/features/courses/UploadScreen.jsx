@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { LogoLockup } from '../../components/Logo.jsx'
-import { Steps } from '../../components/BackHeader.jsx'
+import { BackHeader, Steps } from '../../components/BackHeader.jsx'
 import { AlertIcon, CheckIcon, Spinner, UploadIcon, WifiOffIcon } from '../../components/Icons.jsx'
 import { readPortalFiles } from '../upload/readFiles.js'
 import { useStudent } from './StudentContext.jsx'
@@ -80,7 +80,7 @@ export default function UploadScreen() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const demoState = params.get('state')
-  const { applyUpload } = useStudent()
+  const { applyUpload, hasRecord } = useStudent()
   const input = useRef(null)
   const lastParsed = useRef(null) // نحتفظ بالقراءة عشان «جرّب مرة ثانية» ما يحتاج يختار من جديد
   const [status, setStatus] = useState('idle')
@@ -128,9 +128,14 @@ export default function UploadScreen() {
   return (
     <main className="screen screen--roomy">
       <input ref={input} type="file" accept="application/pdf,.pdf" multiple hidden onChange={handleFiles} />
-      <header className="header">
-        <LogoLockup />
-      </header>
+      {/* لو عنده خطة من قبل، يقدر يرجع لها. أول مرة؟ ما فيه صفحة قبلها. */}
+      {hasRecord ? (
+        <BackHeader to="/plan" label="رجوع لخطتك"><span className="muted">خطتك</span></BackHeader>
+      ) : (
+        <header className="header">
+          <LogoLockup />
+        </header>
+      )}
       <Steps step={1} percent={{ idle: 50, loading: 75, offline: 62 }[shown] ?? 50} />
 
       <div className="stack" role={isError ? 'alert' : undefined} aria-live="polite">

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useSearchParams } from 'react-router'
 import { LogoLockup } from '../../components/Logo.jsx'
+import { BackHeader } from '../../components/BackHeader.jsx'
 import { AlertIcon, CheckIcon, LockIcon, Spinner } from '../../components/Icons.jsx'
 import { useStudent } from './StudentContext.jsx'
 import { buildPlan } from './plan.js'
@@ -66,9 +67,7 @@ export default function PlanScreen() {
 
   return (
     <main className="screen" style={{ gap: 'var(--space-1)' }}>
-      <header className="header">
-        <LogoLockup />
-      </header>
+      <BackHeader to="/confirm" label="رجوع لتأكيد المواد"><span className="muted">موادك</span></BackHeader>
 
       <div className={save === 'done' ? 'snap stack' : 'stack'} style={{ gap: 0, borderRadius: 'var(--radius-card)' }}>
         <div className="muted" style={{ fontWeight: 500 }}>خطتك للترم الجاي</div>
@@ -248,9 +247,7 @@ function PlanLoading() {
 function PlanEmpty() {
   return (
     <main className="screen">
-      <header className="header">
-        <LogoLockup />
-      </header>
+      <BackHeader to="/confirm" label="رجوع لتأكيد المواد"><span className="muted">موادك</span></BackHeader>
       <div className="stack stack--2 grow" style={{ justifyContent: 'center' }}>
         <div className="radio radio--on" style={{ width: 64, height: 64, borderRadius: 32, background: 'transparent', border: '2px solid var(--color-accent)', color: 'var(--color-accent)' }}>
           <CheckIcon size={28} />
