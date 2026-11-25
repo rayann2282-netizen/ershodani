@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router'
 import { LogoLockup } from '../../components/Logo.jsx'
 import { BackHeader, Steps } from '../../components/BackHeader.jsx'
 import { AlertIcon, CheckIcon, Spinner, UploadIcon, WifiOffIcon } from '../../components/Icons.jsx'
 import { readPortalFiles } from '../upload/readFiles.js'
 import { SignOutLink } from '../auth/SignOutLink.jsx'
+import { hasBeenWelcomed } from '../welcome/welcomed.js'
 import { useStudent } from './StudentContext.jsx'
 
 // الطالب يختار الملفين مع بعض. نقرأهم في المتصفح (ما يطلعون من الجوال)، ونحفظ قائمة المواد بس.
@@ -138,6 +139,9 @@ export default function UploadScreen() {
     input.current?.click()
   }
 
+  // أول مرة يدخل (ما رفع ملفات قبل، وما شاف الترحيب): نوريه الخطوات أول.
+  if (!hasRecord && !demoState && !hasBeenWelcomed()) return <Navigate to="/welcome" replace />
+
   return (
     <main className="screen screen--roomy">
       <input ref={input} type="file" accept="application/pdf,.pdf" multiple hidden onChange={handleFiles} />
@@ -172,6 +176,7 @@ export default function UploadScreen() {
       <div className="stack">
         <Slot number="١" title={REPORT} status={copy.slots[0][0]} note={copy.slots[0][1]} />
         <Slot number="٢" title={TRANSCRIPT} status={copy.slots[1][0]} note={copy.slots[1][1]} />
+        <Link to="/privacy" className="link muted">🔒 ملفاتك ما تطلع من جوالك. وش نحفظ؟</Link>
       </div>
 
       <div className="footer">

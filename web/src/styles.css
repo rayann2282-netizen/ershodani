@@ -646,11 +646,64 @@ button {
     transform: translateY(40px);
   }
 }
+/* الخطة: المواد تطلع وحدة ورا الثانية (60ms بينها). --i يجي من PlanScreen. */
+.rise {
+  animation: rise 320ms ease-out both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+/* وقت تصوير الخطة نوقف الحركة، عشان المواد ما تطلع شفافة في الصورة. */
+.no-motion .rise {
+  animation: none;
+}
 @media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
   *,
   *::before,
   *::after {
     animation-duration: 1ms !important;
     transition-duration: 1ms !important;
   }
+}
+
+/* شاشة الترحيب: رقم الخطوة في مربع بلون التطبيق. */
+.welcome__num {
+  flex-shrink: 0;
+  width: var(--size-row);
+  height: var(--size-row);
+  border-radius: var(--radius-input);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* اختيار الحمل في الخطة: ٣ أزرار جنب بعض، المختار بلون التطبيق. */
+.segmented {
+  display: flex;
+  gap: var(--space-1);
+}
+.segmented__btn {
+  flex: 1;
+  min-height: var(--size-row);
+  border-radius: var(--radius-input);
+  border: var(--border) solid var(--color-line);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+.segmented__btn[aria-pressed='true'] {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
 }

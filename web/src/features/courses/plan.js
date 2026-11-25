@@ -120,3 +120,12 @@ export function openGroups(groups) {
     .filter((g) => g.passed < g.required)
     .map((g) => ({ ...g, remaining: g.required - g.passed }))
 }
+
+// الحمل اللي يبيه الطالب هالترم (قصة Should في PRD). «ثقيل» = الحد الأعلى (١٩)، وهو الأصل.
+export const LOADS = [
+  { key: 'light', label: 'خفيف', hours: 12 },
+  { key: 'medium', label: 'متوسط', hours: 15 },
+  { key: 'heavy', label: 'ثقيل', hours: MAX_HOURS },
+]
+export const DEFAULT_LOAD = 'heavy'
+export const loadHours = (key) => (LOADS.find((l) => l.key === key) ?? LOADS.find((l) => l.key === DEFAULT_LOAD)).hours

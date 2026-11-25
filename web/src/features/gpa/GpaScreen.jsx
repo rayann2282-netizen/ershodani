@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import { BackHeader } from '../../components/BackHeader.jsx'
 import { useStudent } from '../courses/StudentContext.jsx'
 import { buildPlan } from '../courses/plan.js'
-import { requiredGpa, GPA_MAX } from './gpa.js'
+import { requiredGpa, encouragement, GPA_MAX } from './gpa.js'
 import { ar, parseNumber } from '../../lib/format.js'
 
 const STEP = 0.25
@@ -11,11 +11,11 @@ const STEP = 0.25
 // كل الأرقام تجي من ملفاته، بس الطالب يقدر يعدّلها بيده.
 // نحفظها كنص (string) عشان يقدر يكتب «٣٫» وهو في نص الكتابة بدون ما يتلخبط.
 export default function GpaScreen() {
-  const { student, chosenElectives, gpaInputs, setGpaInputs } = useStudent()
+  const { student, chosenElectives, gpaInputs, setGpaInputs, maxHours } = useStudent()
   const fromFiles = {
     current: ar(student.summary.cumulativeGpa ?? 0, 2),
     earned: ar(student.summary.earnedHours),
-    planned: ar(buildPlan({ student, chosenElectives }).totalHours),
+    planned: ar(buildPlan({ student, chosenElectives, maxHours }).totalHours),
   }
   // نبدأ من المحفوظ، واللي ما انحفظ ناخذه من الملفات.
   const [form, setFormState] = useState({
@@ -75,6 +75,8 @@ export default function GpaScreen() {
           <span className="title title--light muted">من ٥</span>
         </div>
         <p className={impossible || !valid ? 'warn' : 'muted'}>{note}</p>
+        {/* كلمة تشجيع: بس لما فيه رقم مطلوب (المحقق والمستحيل لهم كلامهم فوق). */}
+        {result?.status === 'ok' && <p className="semibold">{encouragement({ ...result, current }).text}</p>}
       </div>
 
       <div className="card stack--2">

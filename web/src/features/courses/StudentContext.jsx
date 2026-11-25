@@ -3,7 +3,7 @@ import { demoStudent } from '../../data/mockStudents.js'
 import { registerCourseNames } from '../../data/studyPlan.js'
 import { EMPTY_PROGRESS, clearProgress, loadProgress, saveProgress, saveUpload } from '../../lib/progressStore.js'
 import { useAuth } from '../auth/AuthContext.jsx'
-import { gradeStatus } from './plan.js'
+import { DEFAULT_LOAD, gradeStatus, loadHours } from './plan.js'
 
 // Context = مكان واحد نحفظ فيه بيانات الطالب، وأي شاشة تقدر تقراها
 // بدون ما نمررها من شاشة لشاشة. كل شي ينحفظ في Supabase عن طريق progressStore.
@@ -101,7 +101,25 @@ export function StudentProvider({ children }) {
     [record, markedPassed],
   )
 
-  const value = { student, hasRecord: Boolean(record), loaded, chosenElectives, setChosenElectives, markedPassed, setMarkedPassed, gpaInputs, setGpaInputs, resetProgress, applyUpload }
+  // الحمل (خفيف، متوسط، ثقيل): نحفظه في المتصفح لكل حساب، راحة للطالب بس.
+  const [load, setLoadState] = useState(DEFAULT_LOAD)
+  useEffect(() => {
+    try {
+      setLoadState(localStorage.getItem(`ershodani.load.${userId}`) ?? DEFAULT_LOAD)
+    } catch {
+      setLoadState(DEFAULT_LOAD)
+    }
+  }, [userId])
+  function setLoad(next) {
+    setLoadState(next)
+    try {
+      localStorage.setItem(`ershodani.load.${userId}`, next)
+    } catch {
+      // المتصفح ما سمح بالحفظ: يبقى لين يسكّر الصفحة
+    }
+  }
+
+  const value = { student, hasRecord: Boolean(record), loaded, chosenElectives, setChosenElectives, markedPassed, setMarkedPassed, gpaInputs, setGpaInputs, resetProgress, applyUpload, load, setLoad, maxHours: loadHours(load) }
   // ما نعرض الشاشات قبل ما نقرأ المحفوظ، عشان ما تبدأ فاضية وبعدين تتغيّر.
   return <StudentContext.Provider value={value}>{loaded ? children : null}</StudentContext.Provider>
 }

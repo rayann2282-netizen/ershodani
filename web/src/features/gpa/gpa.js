@@ -14,3 +14,17 @@ export function requiredGpa({ current, earnedHours, plannedHours, target }) {
   if (need > GPA_MAX) return { status: 'impossible', required: null, maxReach: floor2(maxReach) }
   return { status: 'ok', required: ceil2(need), maxReach: floor2(maxReach) }
 }
+
+// كلمة تشجيع حسب صعوبة الهدف، مقارنة بمعدله الحين (نفس النبرة: صاحب يساعدك).
+//   done        ← هدفك محقق
+//   easy        ← المطلوب أقل من أو يساوي معدلك الحين
+//   stretch     ← أعلى من معدلك بنص درجة أو أقل
+//   hard        ← أعلى من كذا، بس أقل من ٥
+//   impossible  ← فوق ٥
+export function encouragement({ status, required, current }) {
+  if (status === 'done') return { level: 'done', text: 'هدفك محقق أصلاً 🎉 حافظ على مستواك.' }
+  if (status === 'impossible') return { level: 'impossible', text: 'هالهدف ما يجي في ترم واحد، بس يجي على ترمين. لا تيأس.' }
+  if (required <= current) return { level: 'easy', text: 'تقدر عليها 💪 نفس مستواك أو أقل.' }
+  if (required - current <= 0.5) return { level: 'stretch', text: 'تحتاج ترفع شوي عن مستواك. ركّز على المواد اللي ساعاتها أكثر.' }
+  return { level: 'hard', text: 'صعبة بس ممكنة 🔥 تحتاج أعلى تقدير في أغلب موادك.' }
+}

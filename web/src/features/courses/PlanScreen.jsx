@@ -5,9 +5,9 @@ import { BackHeader } from '../../components/BackHeader.jsx'
 import { SignOutLink } from '../auth/SignOutLink.jsx'
 import { AlertIcon, CheckIcon, LockIcon, Spinner } from '../../components/Icons.jsx'
 import { useStudent } from './StudentContext.jsx'
-import { buildPlan } from './plan.js'
+import { LOADS, buildPlan } from './plan.js'
 import { studentForState } from '../../data/mockStudents.js'
-import { courseName } from '../../data/studyPlan.js'
+import { MAX_HOURS, courseName } from '../../data/studyPlan.js'
 import { ar, coursesCount, courseCode, hoursCount, hoursShort } from '../../lib/format.js'
 
 // الحالات: ?state=loading | empty | full | save-error | saved | withdrawn | in-progress
@@ -37,7 +37,7 @@ export default function PlanScreen() {
   const student = DATA_STATES.includes(state) ? studentForState(state) : ctx.student
   const chosen = state === 'full' ? FULL_ELECTIVES : ctx.chosenElectives
   const [deferred, setDeferred] = useState([])
-  const plan = buildPlan({ student, chosenElectives: chosen, deferred })
+  const plan = buildPlan({ student, chosenElectives: chosen, deferred, maxHours: ctx.maxHours })
 
   // حفظ الصورة: idle ← loading ← done (أو error).
   // نصوّر الخطة بـ html-to-image (نحمّلها بس لما يضغط الزر)، وبعدها:
@@ -53,6 +53,7 @@ export default function PlanScreen() {
     try {
       const { toBlob } = await import('html-to-image')
       const node = screenRef.current
+      node.classList.add('no-motion')
       const blob = await toBlob(node, {
         pixelRatio: 2,
         backgroundColor: getComputedStyle(document.body).backgroundColor,
@@ -89,6 +90,10 @@ export default function PlanScreen() {
   if (state === 'loading') return <PlanLoading />
   if (plan.isEmpty) return <PlanEmpty />
 
+  // المواد تطلع وحدة ورا الثانية بنفس ترتيبها في الصفحة (--i = رقمها). شوف .rise في styles.css.
+  const riseOrder = [...plan.late, ...plan.eligible, ...plan.electives, ...plan.locked].map((c) => c.key)
+  const rise = (key) => ({ '--i': riseOrder.indexOf(key) })
+
   // سبب القفل: «بسبب كفاءات الإدارة»، أو «لأنك حذفت …»، أو «بعد المحاسبة» (متطلبها في خطة هالترم).
   const lockReason = (blockedBy) => {
     const blocker = plan.late.find((l) => blockedBy.includes(l.key))
@@ -112,12 +117,22 @@ export default function PlanScreen() {
         </div>
       </div>
 
+      {/* الحمل: كم ساعة يبي هالترم. ما يطلع في صورة الخطة. */}
+      <div className="segmented" role="group" aria-label="كم تبي تشيل هالترم؟" data-no-capture>
+        {LOADS.map((l) => (
+          <button key={l.key} type="button" className="segmented__btn" aria-pressed={ctx.load === l.key} onClick={() => ctx.setLoad(l.key)}>
+            {l.label} · {ar(l.hours)}
+          </button>
+        ))}
+      </div>
+
       {plan.overBy > 0 && (
         <div role="alert" className="alert">
           <div className="alert__title">زادت {hoursCount(plan.overBy)} عن الحد</div>
           <div className="alert__body">
             الحد {ar(plan.maxHours)} ساعة.
             {plan.deferSuggestion && ` نقترح تأجّل «${courseName(plan.deferSuggestion)}» للترم اللي بعده، لأنها ما تقفل عليك أي مادة إجبارية.`}
+            {!plan.deferSuggestion && plan.maxHours < MAX_HOURS && ` مواد مستواك أكثر من الحمل اللي اخترته. اختر حمل أثقل، أو شيل متطلب اخترته.`}
           </div>
         </div>
       )}
@@ -126,7 +141,7 @@ export default function PlanScreen() {
         {plan.late.length > 0 && <div className="section-label" style={{ paddingBlock: 'var(--space-1)' }}>متأخرة عليك · خذها أول</div>}
         {plan.late.map((c) =>
           c.locks.length > 0 ? (
-            <div key={c.key} className="card">
+            <div key={c.key} className="card rise" style={rise(c.key)}>
               <div className="row" style={{ border: 0, minHeight: 0 }}>
                 <span className="bold">{courseName(c.key)}</span>
                 <span className="badge">أولوية</span>
@@ -144,7 +159,7 @@ export default function PlanScreen() {
               </div>
             </div>
           ) : (
-            <div key={c.key} className="row row--pad">
+            <div key={c.key} className="row row--pad rise" style={rise(c.key)}>
               <span className="row__main">
                 <span>{courseName(c.key)}</span>
                 <span className="caption muted">{SHORT_REASON[c.reason](c.key)}</span>
@@ -164,7 +179,7 @@ export default function PlanScreen() {
             {plan.eligible
               .filter((c) => c.level === level)
               .map((c) => (
-                <div key={c.key} className="row row--pad">
+                <div key={c.key} className="row row--pad rise" style={rise(c.key)}>
                   <span className="row__main">
                     <span>{courseName(c.key)}</span>
                     {c.conditionalOn.length > 0 && <span className="caption muted">تنفتح لك إذا تجاوزت «{courseName(c.conditionalOn[0])}» هالترم</span>}
@@ -178,7 +193,7 @@ export default function PlanScreen() {
 
         {plan.electives.length > 0 && <div className="section-label">متطلبات اخترتها</div>}
         {plan.electives.map((c) => (
-          <div key={c.key} className="row">
+          <div key={c.key} className="row rise" style={rise(c.key)}>
             <span>{courseName(c.key)}</span>
             {plan.deferSuggestion === c.key && <span className="caption warn semibold">نقترح تأجيلها</span>}
             <span className="row__end">{hoursShort(c.hours)}</span>
@@ -195,7 +210,7 @@ export default function PlanScreen() {
 
         {plan.locked.length > 0 && <div className="section-label">مقفلة عليك هالترم ({ar(plan.locked.length)})</div>}
         {plan.locked.map((c) => (
-          <Link key={c.key} to={`locked/${encodeURIComponent(c.key)}${location.search}`} className="row row--locked">
+          <Link key={c.key} to={`locked/${encodeURIComponent(c.key)}${location.search}`} className="row row--locked rise" style={rise(c.key)}>
             <LockIcon />
             <span>{courseName(c.key)}</span>
             <span className="row__end">{lockReason(c.blockedBy)}</span>

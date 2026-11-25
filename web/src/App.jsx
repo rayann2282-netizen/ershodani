@@ -11,6 +11,8 @@ import LockedSheet from './features/courses/LockedSheet.jsx'
 import ElectivesScreen from './features/courses/ElectivesScreen.jsx'
 import GpaScreen from './features/gpa/GpaScreen.jsx'
 import StatesScreen from './features/dev/StatesScreen.jsx'
+import PrivacyScreen from './features/privacy/PrivacyScreen.jsx'
+import WelcomeScreen from './features/welcome/WelcomeScreen.jsx'
 
 // Routes = كل رابط وش الشاشة اللي يعرضها. زر الرجوع في الجوال يشتغل لأن كل شاشة لها رابط.
 // كل الشاشات داخل <RequireAuth> تحتاج دخول.
@@ -22,7 +24,9 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<LoginScreen />} />
+            <Route path="/privacy" element={<PrivacyScreen />} />
             <Route element={<RequireAuth />}>
+              <Route path="/welcome" element={<WelcomeScreen />} />
               <Route path="/upload" element={<UploadScreen />} />
               {/* صفحة التجربة: على جهازك بس (npm run dev)، ما تطلع في الموقع المنشور. */}
               {import.meta.env.DEV && <Route path="/states" element={<StatesScreen />} />}

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { requiredGpa } from './gpa.js'
+import { requiredGpa, encouragement } from './gpa.js'
 
 const base = { current: 3.82, earnedHours: 55, plannedHours: 14 }
 
@@ -16,5 +16,15 @@ describe('requiredGpa', () => {
 
   it('says done when the target is already reached', () => {
     expect(requiredGpa({ ...base, target: 3 }).status).toBe('done')
+  })
+})
+
+describe('encouragement', () => {
+  it('matches how hard the target is compared with the current GPA', () => {
+    expect(encouragement({ status: 'done', required: 0, current: 3.5 }).level).toBe('done')
+    expect(encouragement({ status: 'ok', required: 3.4, current: 3.5 }).level).toBe('easy')
+    expect(encouragement({ status: 'ok', required: 3.9, current: 3.5 }).level).toBe('stretch')
+    expect(encouragement({ status: 'ok', required: 4.66, current: 3.5 }).level).toBe('hard')
+    expect(encouragement({ status: 'impossible', required: null, current: 3.5 }).level).toBe('impossible')
   })
 })

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildPlan, gradeStatus, openGroups } from './plan.js'
+import { buildPlan, gradeStatus, openGroups, loadHours } from './plan.js'
 import { demoStudent, studentForState } from '../../data/mockStudents.js'
 
 describe('gradeStatus', () => {
@@ -129,5 +129,29 @@ describe('openGroups', () => {
     const groups = openGroups(demoStudent.groups)
     expect(groups.map((g) => g.name)).toEqual(['المهارات التواصلية والشخصية', 'المهارات المهنية وسوق العمل', 'متطلب جامعي ٥'])
     expect(groups[1].remaining).toBe(1)
+  })
+})
+
+describe('loads', () => {
+  it('maps light, medium and heavy to 12, 15 and 19 hours (unknown = heavy)', () => {
+    expect(['light', 'medium', 'heavy', 'nonsense'].map(loadHours)).toEqual([12, 15, 19, 19])
+  })
+
+  it('fills fewer next-level courses on a lighter load', () => {
+    const student = {
+      transcript: ['نال 1130', 'نال 1235', 'نال 1200', 'عال 1241', 'عال 1242', 'نال 1220'].map((course) => ({ course, grade: 'ب' })),
+      currentLevel: { level: 4, courses: ['حسب 1250', 'نال 1241', 'نال 1290'] },
+      remainingLevels: [{ level: 5, courses: ['عال 1322', 'نال 1350', 'نال 1310', 'نال 1321'] }],
+      mandatoryUniversity: [],
+    }
+    const light = buildPlan({ student, maxHours: loadHours('light') })
+    expect(light.eligible.map((c) => c.key)).toEqual(['حسب 1250', 'نال 1241', 'نال 1290', 'عال 1322'])
+    expect(light.totalHours).toBe(12)
+  })
+
+  it('never drops courses of the current level: a light load can go over the limit', () => {
+    const plan = buildPlan({ student: demoStudent, maxHours: loadHours('light') })
+    expect(plan.overBy).toBeGreaterThan(0)
+    expect(plan.maxHours).toBe(12)
   })
 })

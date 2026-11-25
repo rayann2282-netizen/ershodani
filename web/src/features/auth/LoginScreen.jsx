@@ -97,6 +97,7 @@ export default function LoginScreen() {
         ) : (
           <Link to="/login?mode=signup" replace className="btn btn--text" state={location.state}>ما عندك حساب؟ سوّ حساب</Link>
         )}
+        <Link to="/privacy" className="link muted" style={{ alignSelf: 'center', marginInlineStart: 0 }}>خصوصيتك: وش نحفظ ووش ما نحفظ</Link>
       </div>
     </form>
   )

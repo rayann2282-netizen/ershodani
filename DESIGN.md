@@ -161,6 +161,8 @@ None. Depth comes from `surface` on `bg`. Focus: `outline: 2px solid #2EC4B6; ou
 
 All presses: 120ms `scale(.98)`.
 
+Plan rows (added 2026-11-25): each course rises in (opacity 0→1, 8px up, 320ms ease-out), 60ms after the one before it, in page order. Off with `prefers-reduced-motion` and while the plan image is taken. The welcome steps use the same rise.
+
 ## 8. Arabic and RTL rules
 
 - `<html lang="ar" dir="rtl">`; use logical properties (`margin-inline-start`, `padding-inline`).
