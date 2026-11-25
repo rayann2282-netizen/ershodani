@@ -4,6 +4,7 @@ import { LogoLockup } from '../../components/Logo.jsx'
 import { BackHeader, Steps } from '../../components/BackHeader.jsx'
 import { AlertIcon, CheckIcon, Spinner, UploadIcon, WifiOffIcon } from '../../components/Icons.jsx'
 import { readPortalFiles } from '../upload/readFiles.js'
+import { SignOutLink } from '../auth/SignOutLink.jsx'
 import { useStudent } from './StudentContext.jsx'
 
 // الطالب يختار الملفين مع بعض. نقرأهم في المتصفح (ما يطلعون من الجوال)، ونحفظ قائمة المواد بس.
@@ -187,6 +188,7 @@ export default function UploadScreen() {
         )}
         {/* [?] شاشة الإدخال اليدوي ما انبنت للحين، فنخلي الرابط في صفحات التجربة بس */}
         {demoState === 'idle' && <Link to="/confirm" className="btn btn--secondary">ما عندي الملفات، بحددها بيدي</Link>}
+        <SignOutLink />
       </div>
     </main>
   )

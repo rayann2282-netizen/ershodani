@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useSearchParams } from 'react-router'
 import { LogoLockup } from '../../components/Logo.jsx'
 import { BackHeader } from '../../components/BackHeader.jsx'
+import { SignOutLink } from '../auth/SignOutLink.jsx'
 import { AlertIcon, CheckIcon, LockIcon, Spinner } from '../../components/Icons.jsx'
 import { useStudent } from './StudentContext.jsx'
 import { buildPlan } from './plan.js'
@@ -244,6 +245,7 @@ export default function PlanScreen() {
             )}
           </>
         )}
+        <SignOutLink />
       </div>
 
       {/* نافذة «مادة مقفلة» تطلع هنا فوق الخطة */}
