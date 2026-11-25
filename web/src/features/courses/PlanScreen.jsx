@@ -185,7 +185,7 @@ export default function PlanScreen() {
         ))}
 
         {plan.remainingHours > 0 && !plan.overBy && (
-          <Link to="/electives" className="dashed-add">
+          <Link to="/electives" className="dashed-add" data-no-capture>
             <span className="plus">+</span>
             <span className="semibold">باقي لك {hoursCount(plan.remainingHours)}</span>
             <span className="row__end caption">اختر متطلباتك</span>
