@@ -816,3 +816,9 @@ button {
   color: var(--color-text);
   font-weight: 600;
 }
+
+/* زر «اقرأ الخصوصية والشروط» تحت كلمة المرور: أصغر من الأزرار الرئيسية. */
+.privacy-btn {
+  font-size: var(--text-caption);
+  text-decoration: none;
+}

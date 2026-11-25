@@ -8,7 +8,7 @@ import { useAuth } from './AuthContext.jsx'
 // ?state=error للتجربة بس (يعرض رسالة الخطأ بدون ما يكلم Supabase).
 const DEMO_ERROR = 'الإيميل أو كلمة المرور ما تطابق. تأكد إن لوحة المفاتيح إنجليزي.'
 const GOOGLE_ERROR = 'ما قدرنا ندخلك بقوقل. جرّب مرة ثانية، أو ادخل بإيميلك.'
-const CONSENT_ERROR = 'لازم تقرأ الخصوصية وتوافق عليها أول.'
+const CONSENT_ERROR = 'لازم توافق على الخصوصية والشروط أول. تقدر تقرأها من الزر اللي فوق.'
 const CONSENT_KEY = 'ershodani.privacyAccepted'
 
 export default function LoginScreen() {
@@ -104,6 +104,8 @@ export default function LoginScreen() {
           <label htmlFor="password">كلمة المرور</label>
           <input id="password" type="password" dir="ltr" autoComplete={isSignup ? 'new-password' : 'current-password'} required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} aria-invalid={fieldError} aria-describedby={fieldError ? 'login-error' : undefined} />
         </div>
+        {/* زر واضح تحت كلمة المرور: يقرأ الخصوصية والشروط قبل ما يوافق تحت. */}
+        <Link to="/privacy" className="btn btn--secondary privacy-btn">🔒 اقرأ الخصوصية والشروط</Link>
         {fieldError && (
           <div id="login-error" role="alert" className="eyebrow warn" style={{ fontWeight: 400, alignItems: 'flex-start' }}>
             <AlertIcon />
@@ -117,7 +119,7 @@ export default function LoginScreen() {
         <label className="consent">
           <input type="checkbox" checked={accepted} onChange={toggleAccepted} aria-invalid={!fieldError && Boolean(error)} aria-describedby={!fieldError && error ? 'consent-error' : undefined} />
           <span>
-            قريت <Link to="/privacy">الخصوصية</Link> وأوافق عليها
+            قريت الخصوصية والشروط وأوافق عليها
           </span>
         </label>
         {!fieldError && error && (
