@@ -8,7 +8,7 @@ const AuthContext = createContext(null)
 // نحوّل أخطاء Supabase لكلام الطالب يفهمه.
 function messageFor(error) {
   const text = `${error?.code ?? ''} ${error?.message ?? ''}`.toLowerCase()
-  if (text.includes('invalid') && text.includes('credentials')) return 'الإيميل أو كلمة المرور ما تطابق. تأكد إن لوحة المفاتيح إنجليزي، أو غيّر كلمة المرور من تحت.'
+  if (text.includes('invalid') && text.includes('credentials')) return 'الإيميل أو كلمة المرور ما تطابق. تأكد إن لوحة المفاتيح إنجليزي.'
   if (text.includes('already') || text.includes('user_already_exists')) return 'هالإيميل عنده حساب. ادخل بدل ما تسوي حساب جديد.'
   if (text.includes('password') && (text.includes('6') || text.includes('weak') || text.includes('short'))) return 'كلمة المرور لازم تكون ٦ حروف أو أكثر.'
   if (text.includes('email') && text.includes('invalid')) return 'الإيميل مكتوب غلط. تأكد منه.'
@@ -37,6 +37,14 @@ export function AuthProvider({ children }) {
     return error ? messageFor(error) : null
   }
 
+  // الدخول بقوقل: نوديه لصفحة قوقل، وبعد ما يوافق يرجع لـ /login وSupabase يقرأ الجلسة من الرابط.
+  // `next` = الصفحة اللي كان رايح لها، عشان نرجعه لها بعد الدخول.
+  async function signInWithGoogle(next = '/upload') {
+    const redirectTo = `${window.location.origin}/login?next=${encodeURIComponent(next)}`
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } })
+    return error ? messageFor(error) : null
+  }
+
   async function signUp(email, password) {
     const { data, error } = await supabase.auth.signUp({ email: email.trim(), password })
     if (error) return messageFor(error)
@@ -49,7 +57,7 @@ export function AuthProvider({ children }) {
     await supabase.auth.signOut()
   }
 
-  const value = { session, user: session?.user ?? null, ready, signIn, signUp, signOut }
+  const value = { session, user: session?.user ?? null, ready, signIn, signInWithGoogle, signUp, signOut }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
