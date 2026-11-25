@@ -59,7 +59,7 @@ export async function loadProgress(userId) {
   if (!userId) return { ...EMPTY_PROGRESS }
 
   const [courses, plan, gpa] = await Promise.all([
-    supabase.from('student_courses').select('course_code, grade, term, marked_passed'),
+    supabase.from('student_courses').select('course_code, course_name, grade, term, marked_passed'),
     supabase
       .from('plans')
       .select('current_level, level_courses, remaining_levels, mandatory_university, requirement_groups, cumulative_gpa, earned_hours, chosen_electives, report_read_at')
@@ -80,7 +80,7 @@ export async function loadProgress(userId) {
     gpaInputs: toGpaInputs(gpa.data),
     record: p?.report_read_at
       ? {
-          transcript: courses.data.map((row) => ({ course: row.course_code, grade: row.grade, term: row.term })),
+          transcript: courses.data.map((row) => ({ course: row.course_code, name: row.course_name, grade: row.grade, term: row.term })),
           currentLevel: { level: p.current_level, courses: p.level_courses },
           remainingLevels: p.remaining_levels ?? [],
           mandatoryUniversity: p.mandatory_university,
@@ -107,7 +107,7 @@ export async function saveUpload(userId, { report, transcript }, previous) {
   if (removeOld.error) return { error: removeOld.error }
 
   // ٢. مواد السجل الجديد. الصف اللي علّمه بيده يبقى معلّم (ما نرسل marked_passed).
-  const rows = transcript.transcript.map((t) => ({ user_id: userId, course_code: t.course, grade: t.grade, term: t.term }))
+  const rows = transcript.transcript.map((t) => ({ user_id: userId, course_code: t.course, course_name: t.name ?? null, grade: t.grade, term: t.term }))
   const insert = rows.length ? await supabase.from('student_courses').upsert(rows, { onConflict: 'user_id,course_code' }) : { error: null }
   if (insert.error) return { error: insert.error }
 

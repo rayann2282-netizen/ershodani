@@ -71,7 +71,7 @@ export default function ConfirmScreen() {
                 {passed.map((t) => (
                   <div key={t.course} className="row row--pad" style={{ paddingInline: 'var(--space-2)' }}>
                     <span className="row__main">
-                      <span>{courseName(EQUIVALENTS[t.course] ?? t.course)}</span>
+                      <span>{t.name ?? courseName(EQUIVALENTS[t.course] ?? t.course)}</span>
                       <span className="caption muted">{courseCode(t.course)}</span>
                     </span>
                     <span className="row__end caption muted">{t.grade}</span>
@@ -89,7 +89,7 @@ export default function ConfirmScreen() {
                 {notPassed.map((t) => (
                   <div key={t.course} className="row row--pad" style={{ paddingInline: 'var(--space-2)', borderBlockEnd: 0 }}>
                     <span className="row__main">
-                      <span>{courseName(t.course)}</span>
+                      <span>{t.name ?? courseName(t.course)}</span>
                       <span className="caption muted">{courseCode(t.course)} · {REASON[gradeStatus(t.grade)]} ({t.grade})</span>
                     </span>
                     <button type="button" className="btn btn--secondary btn--small row__end" style={{ color: 'var(--color-text)' }} onClick={() => markAsPassed(t.course)}>لا، خلصتها</button>

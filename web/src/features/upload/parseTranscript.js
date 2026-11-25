@@ -11,6 +11,15 @@ import { gradeStatus } from '../courses/plan.js'
 const GRADES = ['أ+', 'أ', 'ب+', 'ب', 'ج+', 'ج', 'د+', 'د', 'ند', 'هـ', 'ه', 'ح', 'هد', 'ع', 'م', 'ل']
 const normalizeGrade = (g) => (g === 'ه' ? 'هـ' : g)
 
+// اسم المادة في صفها: أطول خانة فيها حروف عربية، وهي مو الرمز ولا التقدير.
+function courseNameIn(row) {
+  const name = row.cells
+    .map((c) => c.text.trim())
+    .filter((t) => /[ء-ي]{2}/.test(t) && !splitGluedCode(t) && !GRADES.includes(t.replace(/\s/g, '')))
+    .sort((a, b) => b.length - a.length)[0]
+  return name ? name.slice(0, 120) : null
+}
+
 export function parseTranscript(pages) {
   // نقسم الصفحة نصين عند منتصفها تقريباً.
   const widths = pages.flatMap((p) => p.items.map((it) => it.x))
@@ -46,10 +55,10 @@ export function parseTranscript(pages) {
     if (!code) continue
     const grade = row.cells.map((c) => c.text.replace(/\s/g, '')).find((t) => GRADES.includes(t))
     if (!grade) continue
-    entries.set(courseKey(code.prefix, code.number), { grade: normalizeGrade(grade), term: termByHalf[row.half] ?? null })
+    entries.set(courseKey(code.prefix, code.number), { grade: normalizeGrade(grade), term: termByHalf[row.half] ?? null, name: courseNameIn(row) })
   }
 
-  const transcript = [...entries].map(([course, e]) => ({ course, grade: e.grade, term: e.term }))
+  const transcript = [...entries].map(([course, e]) => ({ course, grade: e.grade, term: e.term, name: e.name }))
   return {
     transcript,
     summary: {

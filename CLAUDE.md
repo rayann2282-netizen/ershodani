@@ -110,7 +110,7 @@ Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel project settings.
 - Schema lives only in `supabase/migrations/`, changed only by new numbered migration files in git (run them in the Supabase SQL Editor in order). Never edit tables by hand in the dashboard.
 - Row Level Security ON for every table. Policies: a user can only select/insert/update/delete rows where `user_id = auth.uid()`.
 - Tables (approved 2026-11-24, see `supabase/migrations/0001_init.sql`). Every table has `id`, `user_id`, `created_at`, `updated_at`:
-  - `student_courses (course_code, grade, marked_passed, term)`: one row per course in the student's transcript. Replaces the earlier `passed_courses` because the plan needs the grade (failed, withdrawn, in progress). Unique per `(user_id, course_code)`.
+  - `student_courses (course_code, course_name, grade, marked_passed, term)`: one row per course in the student's transcript. Replaces the earlier `passed_courses` because the plan needs the grade (failed, withdrawn, in progress). Unique per `(user_id, course_code)`.
   - `plans (current_level, level_courses, mandatory_university, requirement_groups, cumulative_gpa, earned_hours, chosen_electives, report_read_at)`: one row per student, from the remaining-courses report plus their choices.
   - `gpa_inputs (current_gpa, completed_hours, planned_hours, target_gpa)`: one row per student; `null` means "use the value from my files".
 - Never store the PDFs, the full name, the student ID or the birth year. Computed results (late, locked, total hours, required GPA) are never stored.

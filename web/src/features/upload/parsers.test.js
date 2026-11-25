@@ -85,6 +85,11 @@ describe('parseTranscript', () => {
     expect(byCourse).toEqual({ 'نال 1130': 'ب', 'عال 1241': 'أ', 'نال 1200': 'هـ', 'نال 1235': 'م' })
   })
 
+  it('reads the name of each course as written in the transcript', () => {
+    const names = Object.fromEntries(result.transcript.map((t) => [t.course, t.name]))
+    expect(names).toEqual({ 'نال 1130': 'هندسة المتطلبات', 'عال 1241': 'البرمجة الشيئية', 'نال 1200': 'كفاءات الإدارة', 'نال 1235': 'تحليل وتصميم النظم' })
+  })
+
   it('reads the term of each course', () => {
     expect(result.transcript.find((t) => t.course === 'نال 1200').term).toBe('الفصل الأول 1447')
   })
