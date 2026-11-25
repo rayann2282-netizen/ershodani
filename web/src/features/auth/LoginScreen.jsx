@@ -9,7 +9,7 @@ import { PrivacySections } from '../privacy/PrivacyScreen.jsx'
 // ?state=error للتجربة بس (يعرض رسالة الخطأ بدون ما يكلم Supabase).
 const DEMO_ERROR = 'الإيميل أو كلمة المرور ما تطابق. تأكد إن لوحة المفاتيح إنجليزي.'
 const GOOGLE_ERROR = 'ما قدرنا ندخلك بقوقل. جرّب مرة ثانية، أو ادخل بإيميلك.'
-const CONSENT_ERROR = 'لازم توافق على الخصوصية والشروط أول. تقدر تقرأها من الزر اللي فوق.'
+const CONSENT_ERROR = 'لازم توافق على الخصوصية أول. تقدر تقرأها من الزر اللي فوق.'
 const CONSENT_KEY = 'ershodani.privacyAccepted'
 
 export default function LoginScreen() {
@@ -115,7 +115,7 @@ export default function LoginScreen() {
         {/* زر واضح تحت الخانات: يفتح الخصوصية في نافذة فوق الصفحة نفسها،
             عشان ما ينمسح الإيميل وكلمة المرور (لو رحنا لصفحة ثانية، الـ state ينمسح). */}
         <button type="button" className="btn btn--secondary privacy-btn" disabled={busy} onClick={() => setShowPrivacy(true)}>
-          🔒 اقرأ الخصوصية والشروط
+          🔒 اقرأ الخصوصية
         </button>
       </div>
 
@@ -143,7 +143,7 @@ export default function LoginScreen() {
         <label className="consent">
           <input type="checkbox" checked={accepted} onChange={toggleAccepted} aria-invalid={!fieldError && Boolean(error)} aria-describedby={!fieldError && error ? 'consent-error' : undefined} />
           <span>
-            قريت الخصوصية والشروط وأوافق عليها
+            قريت الخصوصية وأوافق عليها
           </span>
         </label>
         {!fieldError && error && (
