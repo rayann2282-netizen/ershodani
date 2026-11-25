@@ -12,6 +12,7 @@ import { ar, coursesCount, courseCode, hoursCount, hoursShort } from '../../lib/
 // الحالات: ?state=loading | empty | full | save-error | saved | withdrawn | in-progress
 const DATA_STATES = ['withdrawn', 'in-progress', 'full', 'empty']
 const FULL_ELECTIVES = ['ذاع 1001']
+const PLAN_IMAGE_NAME = 'ershodani-plan.png'
 
 const LATE_REASON = {
   failed: 'لم تتجاوزها · سجّلها هالترم عشان ما تتأخر',
@@ -37,20 +38,51 @@ export default function PlanScreen() {
   const [deferred, setDeferred] = useState([])
   const plan = buildPlan({ student, chosenElectives: chosen, deferred })
 
-  // حفظ الصورة: idle ← loading ← done (أو error). الحفظ الحقيقي يجي مع الباك اند.
+  // حفظ الصورة: idle ← loading ← done (أو error).
+  // نصوّر الخطة بـ html-to-image (نحمّلها بس لما يضغط الزر)، وبعدها:
+  // في الجوال نفتح «مشاركة» عشان يحفظها في الصور، وفي الكمبيوتر تنزل كملف.
   const [save, setSave] = useState(state === 'saved' ? 'done' : state === 'save-error' ? 'error' : 'idle')
+  const screenRef = useRef(null)
   const timers = useRef([])
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
 
-  function handleSave() {
+  async function handleSave() {
     if (save === 'loading') return
     setSave('loading')
-    timers.current.push(
-      setTimeout(() => {
-        setSave('done')
-        timers.current.push(setTimeout(() => setSave('idle'), 2400))
-      }, 1100),
-    )
+    try {
+      const { toBlob } = await import('html-to-image')
+      const node = screenRef.current
+      const blob = await toBlob(node, {
+        pixelRatio: 2,
+        backgroundColor: getComputedStyle(document.body).backgroundColor,
+        // الأزرار ورسائل الحفظ ما تطلع في الصورة، بس الخطة.
+        filter: (el) => !(el.classList?.contains('footer') || el.classList?.contains('icon-btn') || el.dataset?.noCapture !== undefined),
+      })
+      const file = new File([blob], PLAN_IMAGE_NAME, { type: 'image/png' })
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'خطتي للترم الجاي' })
+      } else {
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+        link.download = PLAN_IMAGE_NAME
+        link.click()
+        timers.current.push(setTimeout(() => URL.revokeObjectURL(link.href), 1000))
+      }
+      setSave('done')
+      timers.current.push(setTimeout(() => setSave('idle'), 4000))
+    } catch (error) {
+      // سكّر نافذة المشاركة بنفسه؟ هذا مو خطأ.
+      if (error?.name === 'AbortError') return setSave('idle')
+      console.error('[Ershodani] Could not save the plan image:', error)
+      setSave('error')
+    }
+  }
+
+  // نسخة نصية من الخطة، لو الصورة ما زبطت.
+  async function copyAsText() {
+    const lines = [...plan.late, ...plan.eligible, ...plan.electives].map((c) => `${courseName(c.key)} (${courseCode(c.key)}) · ${hoursShort(c.hours)}`)
+    await navigator.clipboard?.writeText(['خطتي للترم الجاي', ...lines, `المجموع: ${ar(plan.totalHours)} ساعة`].join('\n'))
+    setSave('idle')
   }
 
   if (state === 'loading') return <PlanLoading />
@@ -66,7 +98,7 @@ export default function PlanScreen() {
   }
 
   return (
-    <main className="screen" style={{ gap: 'var(--space-1)' }}>
+    <main ref={screenRef} className="screen" style={{ gap: 'var(--space-1)' }}>
       <BackHeader to="/confirm" label="رجوع لتأكيد المواد"><span className="muted">موادك</span></BackHeader>
 
       <div className={save === 'done' ? 'snap stack' : 'stack'} style={{ gap: 0, borderRadius: 'var(--radius-card)' }}>
@@ -171,16 +203,16 @@ export default function PlanScreen() {
       </div>
 
       {save === 'error' && (
-        <div role="alert" className="alert">
+        <div role="alert" className="alert" data-no-capture>
           <div className="alert__title"><span className="warn"><AlertIcon size={18} /></span>ما انحفظت الصورة</div>
-          <div className="alert__body">المتصفح ما سمح لنا نوصل لصورك. اضغط «جرّب مرة ثانية» واختر «سماح» لما يسألك، أو خذ لقطة شاشة لهالصفحة.</div>
+          <div className="alert__body">ما قدرنا نجهّز الصورة. اضغط «جرّب مرة ثانية»، أو انسخ خطتك كنص، أو خذ لقطة شاشة لهالصفحة.</div>
         </div>
       )}
       {save === 'done' && (
-        <div role="status" className="card" style={{ flexDirection: 'row', alignItems: 'center', gap: 'var(--space-2)' }}>
+        <div role="status" className="card" data-no-capture style={{ flexDirection: 'row', alignItems: 'center', gap: 'var(--space-2)' }}>
           <span className="row__main">
-            <span className="bold">تلقاها في الصور</span>
-            <span className="caption muted">باسم <span dir="ltr">«ershodani-plan-1448-2.png»</span>. افتحها يوم التسجيل وسجّل منها.</span>
+            <span className="bold">جهزت صورة خطتك</span>
+            <span className="caption muted">باسم <span dir="ltr">«{PLAN_IMAGE_NAME}»</span>. افتحها يوم التسجيل وسجّل منها.</span>
           </span>
         </div>
       )}
@@ -198,18 +230,15 @@ export default function PlanScreen() {
               <Link to={`/electives${location.search}`} className="btn btn--secondary">أختار بنفسي وش أشيل</Link>
             )}
           </>
-        ) : !state ? (
-          // حفظ الصورة الحقيقي لسه ما انبنى، فما نعرض الزر للطالب عشان ما نقول «انحفظت» وهي ما انحفظت.
-          <Link to="/gpa" className="btn btn--primary">احسب المعدل اللي تحتاجه</Link>
         ) : (
           <>
             <button type="button" className={save === 'loading' ? 'btn btn--loading' : 'btn btn--primary'} onClick={handleSave} aria-live="polite">
               {save === 'loading' && <Spinner />}
               {save === 'done' && <CheckIcon size={20} width={3} className="pop" />}
-              {{ loading: 'نجهّز الصورة…', done: 'انحفظت في صورك', error: 'جرّب مرة ثانية' }[save] ?? 'احفظ خطتي صورة'}
+              {{ loading: 'نجهّز الصورة…', done: 'جهزت الصورة', error: 'جرّب مرة ثانية' }[save] ?? 'احفظ خطتي صورة'}
             </button>
             {save === 'error' ? (
-              <button type="button" className="btn btn--secondary">انسخ خطتي كنص</button>
+              <button type="button" className="btn btn--secondary" onClick={copyAsText}>انسخ خطتي كنص</button>
             ) : (
               <Link to="/gpa" className="btn btn--secondary">احسب المعدل اللي تحتاجه</Link>
             )}

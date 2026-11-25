@@ -35,6 +35,7 @@ If I ask for anything out of scope, say so before building it.
 | State: `useState` + one Context for the signed-in user | 3 screens don't need a state library | — |
 | Supabase (free plan): Postgres + Auth | Saves each student's progress across devices | supabase-js 2.119.0 |
 | pdfjs-dist (Mozilla) | Reads the two portal PDFs in the browser; the file never leaves the phone. Loaded only on the upload screen | 6.5.438 |
+| html-to-image | Saves the plan as an image (share sheet on phones, download on computers). Loaded only when the button is pressed. Approved 2026-11-25 | 1.11.13 |
 | Vitest | Tests the core calculations, the PDF parsers (with invented data only) and the study-plan data | 5.1.0 |
 | Vercel (Hobby) | Free hosting for `web/` | — |
 
