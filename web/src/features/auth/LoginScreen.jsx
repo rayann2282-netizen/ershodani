@@ -64,7 +64,6 @@ export default function LoginScreen() {
             <span>{error}</span>
           </div>
         )}
-        {!isSignup && <button type="button" className="link">نسيت كلمة المرور؟</button>}
       </div>
 
       <div className="footer">

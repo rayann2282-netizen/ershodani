@@ -195,6 +195,9 @@ export default function PlanScreen() {
             )}
             <button type="button" className="btn btn--secondary">أختار بنفسي وش أشيل</button>
           </>
+        ) : !state ? (
+          // حفظ الصورة الحقيقي لسه ما انبنى، فما نعرض الزر للطالب عشان ما نقول «انحفظت» وهي ما انحفظت.
+          <Link to="/gpa" className="btn btn--primary">احسب المعدل اللي تحتاجه</Link>
         ) : (
           <>
             <button type="button" className={save === 'loading' ? 'btn btn--loading' : 'btn btn--primary'} onClick={handleSave} aria-live="polite">

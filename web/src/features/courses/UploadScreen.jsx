@@ -159,7 +159,6 @@ export default function UploadScreen() {
       <div className="stack">
         <Slot number="١" title={REPORT} status={copy.slots[0][0]} note={copy.slots[0][1]} />
         <Slot number="٢" title={TRANSCRIPT} status={copy.slots[1][0]} note={copy.slots[1][1]} />
-        {(shown === 'idle' || shown === 'unreadable') && <button type="button" className="link">{shown === 'idle' ? 'وين ألقاهم في البوابة؟' : 'كيف أنزّلهم PDF من البوابة؟'}</button>}
       </div>
 
       <div className="footer">

@@ -24,7 +24,8 @@ export default function App() {
             <Route path="/login" element={<LoginScreen />} />
             <Route element={<RequireAuth />}>
               <Route path="/upload" element={<UploadScreen />} />
-              <Route path="/states" element={<StatesScreen />} />
+              {/* صفحة التجربة: على جهازك بس (npm run dev)، ما تطلع في الموقع المنشور. */}
+              {import.meta.env.DEV && <Route path="/states" element={<StatesScreen />} />}
               {/* هذي تحتاج إن الطالب رفع ملفاته */}
               <Route element={<RequireRecord />}>
                 <Route path="/confirm" element={<ConfirmScreen />} />

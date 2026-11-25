@@ -4,7 +4,7 @@ import { CheckIcon, ChevronDownIcon } from '../../components/Icons.jsx'
 import { useStudent } from './StudentContext.jsx'
 import { gradeStatus } from './plan.js'
 import { courseName } from '../../data/studyPlan.js'
-import { ar, courseCode } from '../../lib/format.js'
+import { ar, courseCode, coursesCount } from '../../lib/format.js'
 
 const REASON = { failed: 'لم تتجاوزها', withdrawn: 'حذفتها' }
 
@@ -47,18 +47,18 @@ export default function ConfirmScreen() {
       ) : (
         <>
           <div className="stack">
-            <h1 className="display">خلصت {ar(passedCount)} مادة</h1>
+            <h1 className="display">خلصت {coursesCount(passedCount)}</h1>
             <p className="muted">قرينا الملفين. راجعها بسرعة قبل ما نرتب خطتك.</p>
           </div>
           <FileChecks
-            name={student.fullName ?? `${ar(student.currentLevel.courses.length + student.mandatoryUniversity.length)} مادة باقية لترمك الجاي`}
+            name={student.fullName ?? `${coursesCount(student.currentLevel.courses.length + student.mandatoryUniversity.length)} باقية لترمك الجاي`}
             transcriptNote={student.summary.cumulativeGpa === null ? 'ما فيه معدل للحين' : `المعدل ${ar(student.summary.cumulativeGpa, 2)} من ٥`}
           />
 
           <div className="grow stack stack--2">
             <button type="button" className="btn btn--secondary" aria-expanded="false" style={{ justifyContent: 'flex-start', paddingInline: 'var(--space-2)', border: 0, background: 'var(--color-surface)', height: 'var(--size-button)' }}>
               <span className="bold">خلصتها</span>
-              <span className="muted" style={{ fontWeight: 400 }}>{ar(passedCount)} مادة · {ar(student.summary.earnedHours)} ساعة</span>
+              <span className="muted" style={{ fontWeight: 400 }}>{coursesCount(passedCount)} · {ar(student.summary.earnedHours)} ساعة</span>
               <span className="row__end"><ChevronDownIcon /></span>
             </button>
 
