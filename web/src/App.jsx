@@ -13,6 +13,7 @@ import GpaScreen from './features/gpa/GpaScreen.jsx'
 import StatesScreen from './features/dev/StatesScreen.jsx'
 import PrivacyScreen from './features/privacy/PrivacyScreen.jsx'
 import WelcomeScreen from './features/welcome/WelcomeScreen.jsx'
+import { Credit } from './components/Credit.jsx'
 
 // Routes = كل رابط وش الشاشة اللي يعرضها. زر الرجوع في الجوال يشتغل لأن كل شاشة لها رابط.
 // كل الشاشات داخل <RequireAuth> تحتاج دخول.
@@ -42,6 +43,7 @@ export default function App() {
             </Route>
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
+          <Credit />
         </StudentProvider>
       </AuthProvider>
     </BrowserRouter>

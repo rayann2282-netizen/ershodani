@@ -707,3 +707,15 @@ button {
   border-color: var(--color-accent);
   color: var(--color-on-accent);
 }
+
+/* سطر المؤسس آخر الصفحة (تحت الشاشة، يبان لما ينزل لتحت). */
+.credit {
+  max-width: var(--screen-max);
+  margin-inline: auto;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  text-align: center;
+}
+.credit a {
+  color: var(--color-text);
+  font-weight: 600;
+}

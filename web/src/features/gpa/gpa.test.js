@@ -22,7 +22,9 @@ describe('requiredGpa', () => {
 describe('encouragement', () => {
   it('matches how hard the target is compared with the current GPA', () => {
     expect(encouragement({ status: 'done', required: 0, current: 3.5 }).level).toBe('done')
-    expect(encouragement({ status: 'ok', required: 3.4, current: 3.5 }).level).toBe('easy')
+    expect(encouragement({ status: 'ok', required: 3.4, current: 3.5 }).level).toBe('aim-higher')
+    expect(encouragement({ status: 'ok', required: 3.74, current: 3 }).level).toBe('aim-higher')
+    expect(encouragement({ status: 'ok', required: 3.8, current: 3.9 }).level).toBe('easy')
     expect(encouragement({ status: 'ok', required: 3.9, current: 3.5 }).level).toBe('stretch')
     expect(encouragement({ status: 'ok', required: 4.66, current: 3.5 }).level).toBe('hard')
     expect(encouragement({ status: 'impossible', required: null, current: 3.5 }).level).toBe('impossible')
