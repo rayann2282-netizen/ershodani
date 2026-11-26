@@ -7,6 +7,7 @@ import { readPortalFiles } from '../upload/readFiles.js'
 import { SignOutLink } from '../auth/SignOutLink.jsx'
 import { MenuButton } from '../../components/Menu.jsx'
 import { hasBeenWelcomed } from '../welcome/welcomed.js'
+import { HOWTO_REPORT_URL, HOWTO_TRANSCRIPT_URL, SELF_SERVICE_URL } from '../../lib/links.js'
 import { useStudent } from './StudentContext.jsx'
 
 // الطالب يختار الملفين مع بعض. نقرأهم في المتصفح (ما يطلعون من الجوال)، ونحفظ قائمة المواد بس.
@@ -44,9 +45,9 @@ function copyFor(status, info = {}) {
         title: isImage ? 'الملف صورة' : 'الملف ما انقرأ',
         fileName: info.fileName ?? 'Screenshot_2026-11-20.png',
         body: isImage
-          ? 'صورة، وإحنا نقرأ ملفات PDF بس. نزّل الكشف والسجل من البوابة كـ PDF واخترهم من جديد.'
-          : 'مو ملف من البوابة، أو PDF ممسوح بالكاميرا. نزّل الكشف والسجل من البوابة كـ PDF واخترهم من جديد.',
-        slots: [['idle', 'نحتاجه PDF من البوابة'], ['idle', 'نحتاجه PDF من البوابة']],
+          ? 'صورة، وإحنا نقرأ ملفات PDF بس. نزّل الكشف والسجل من الخدمات الذاتية كـ PDF واخترهم من جديد.'
+          : 'مو ملف من الخدمات الذاتية، أو PDF ممسوح بالكاميرا. نزّل الكشف والسجل من الخدمات الذاتية كـ PDF واخترهم من جديد.',
+        slots: [['idle', 'نحتاجه PDF من الخدمات الذاتية'], ['idle', 'نحتاجه PDF من الخدمات الذاتية']],
         retry: 'اختر الملفين من جديد',
       }
     }
@@ -180,6 +181,17 @@ export default function UploadScreen() {
         <Slot number="٢" title={TRANSCRIPT} status={copy.slots[1][0]} note={copy.slots[1][1]} />
         <Link to="/privacy" className="link muted">🔒 ملفاتك ما تطلع من جوالك. وش نحفظ؟</Link>
       </div>
+
+      {/* وين ألقى الملفين؟ رابط الخدمات الذاتية + شرح لكل ملف. ما نعرضه وقت القراءة. */}
+      {shown !== 'loading' && (
+        <section className="card" aria-label="وين ألقى الملفين؟">
+          <span className="bold">وين ألقى الملفين؟</span>
+          <span className="caption muted">الاثنين من الخدمات الذاتية. نزّل كل واحد PDF، وارجع اخترهم هنا.</span>
+          <a href={SELF_SERVICE_URL} target="_blank" rel="noopener noreferrer" className="btn btn--secondary">افتح الخدمات الذاتية ↗</a>
+          <a href={HOWTO_REPORT_URL} target="_blank" rel="noopener noreferrer" className="link">🎬 شرح: كيف تطلع {REPORT} ↗</a>
+          <a href={HOWTO_TRANSCRIPT_URL} target="_blank" rel="noopener noreferrer" className="link">🎬 شرح: كيف تطلع {TRANSCRIPT} ↗</a>
+        </section>
+      )}
 
       <div className="footer">
         {shown === 'loading' ? (

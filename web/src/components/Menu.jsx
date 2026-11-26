@@ -3,8 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router'
 import { CloseIcon, MenuIcon } from './Icons.jsx'
 import { useAuth } from '../features/auth/AuthContext.jsx'
 import { useStudent } from '../features/courses/StudentContext.jsx'
-
-const TARTEBAH_URL = 'https://trtebh.com/'
+import { TARTEBAH_URL } from '../lib/links.js'
 
 // كل صفحات الموقع في مكان واحد. اللي تحتاج ملفاته (needsRecord) ما تطلع لين يرفعها.
 const PAGES = [

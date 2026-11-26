@@ -41,7 +41,7 @@ export default function ConfirmScreen() {
           <div className="grow">
             <div className="card">
               <span className="bold">خطأ؟ خلصت مواد وما طلعت؟</span>
-              <span className="caption muted">يمكن رفعت سجل قديم. نزّل نسخة جديدة من البوابة، أو ضيف موادك بيدك.</span>
+              <span className="caption muted">يمكن رفعت سجل قديم. نزّل نسخة جديدة من الخدمات الذاتية، أو ضيف موادك بيدك.</span>
               <button type="button" className="link semibold" style={{ color: 'var(--color-text)' }}>ضيف مادة خلصتها</button>
             </div>
           </div>

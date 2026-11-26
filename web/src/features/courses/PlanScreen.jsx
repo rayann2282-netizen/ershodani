@@ -9,12 +9,12 @@ import { LOADS, buildPlan, locksIfRemoved } from './plan.js'
 import { studentForState } from '../../data/mockStudents.js'
 import { MAX_HOURS, courseName } from '../../data/studyPlan.js'
 import { ar, coursesCount, courseCode, hoursCount, hoursShort } from '../../lib/format.js'
+import { SELF_SERVICE_URL, TARTEBAH_URL } from '../../lib/links.js'
 
 // الحالات: ?state=loading | empty | full | save-error | saved | withdrawn | in-progress
 const DATA_STATES = ['withdrawn', 'in-progress', 'full', 'empty']
 const FULL_ELECTIVES = ['ذاع 1001']
 const PLAN_IMAGE_NAME = 'ershodani-plan.png'
-const TARTEBAH_URL = 'https://trtebh.com/'
 
 const LATE_REASON = {
   failed: 'لم تتجاوزها · سجّلها هالترم عشان ما تتأخر',
@@ -345,11 +345,10 @@ function PlanEmpty() {
           <CheckIcon size={28} />
         </div>
         <h1 className="display">خلصت خطتك كاملة</h1>
-        <p className="muted">ما باقي عليك ولا مادة في كشف المقررات المتبقية. الخطوة الجاية: قدّم طلب التخرج من بوابة الجامعة.</p>
+        <p className="muted">ما باقي عليك ولا مادة في كشف المقررات المتبقية. الخطوة الجاية: قدّم طلب التخرج من الخدمات الذاتية.</p>
       </div>
       <div className="footer">
-        {/* [?] رابط بوابة الجامعة: نضيفه لما نتأكد منه */}
-        <button type="button" className="btn btn--primary">افتح بوابة الجامعة</button>
+        <a href={SELF_SERVICE_URL} target="_blank" rel="noopener noreferrer" className="btn btn--primary">افتح الخدمات الذاتية ↗</a>
         <Link to="/gpa" className="btn btn--secondary">احسب معدلك النهائي</Link>
       </div>
     </main>
