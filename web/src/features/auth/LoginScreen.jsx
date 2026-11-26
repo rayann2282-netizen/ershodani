@@ -17,7 +17,7 @@ export default function LoginScreen() {
   const location = useLocation()
   const [params] = useSearchParams()
   const isSignup = params.get('mode') === 'signup'
-  const { user, ready, signIn, signInWithGoogle, signUp } = useAuth()
+  const { user, ready, signIn, signInWithGoogle, signInAsGuest, signUp } = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -58,6 +58,16 @@ export default function LoginScreen() {
 
   // خطأ الموافقة يطلع تحت المربع؛ الباقي (إيميل، كلمة مرور، قوقل) يطلع تحت الخانات.
   const fieldError = Boolean(error) && error !== CONSENT_ERROR
+
+  async function handleGuest() {
+    if (needsConsent()) return
+    setBusy(true)
+    setError(null)
+    const message = await signInAsGuest()
+    setBusy(false)
+    if (message) setError(message)
+    else navigate(nextPath, { replace: true })
+  }
 
   async function handleGoogle() {
     if (needsConsent()) return
@@ -160,6 +170,10 @@ export default function LoginScreen() {
         <button type="button" className="btn btn--secondary" disabled={busy} onClick={handleGoogle}>
           <GoogleIcon />
           ادخل بحساب قوقل
+        </button>
+        {/* ضيف: يجرب بدون حساب. بياناته تبقى في هالمتصفح بس. */}
+        <button type="button" className="btn btn--secondary" disabled={busy} onClick={handleGuest}>
+          👤 جرّب كضيف بدون حساب
         </button>
         {isSignup ? (
           <Link to="/login" replace className="btn btn--text" state={location.state}>عندك حساب؟ ادخل</Link>

@@ -37,6 +37,16 @@ export function AuthProvider({ children }) {
     return error ? messageFor(error) : null
   }
 
+  // الدخول كضيف: Supabase يسوي حساب مؤقت بدون إيميل (anonymous sign-in).
+  // نفس الحماية: الضيف يشوف بياناته بس. لو طلع أو مسح المتصفح، تضيع بياناته.
+  async function signInAsGuest() {
+    const { error } = await supabase.auth.signInAnonymously()
+    if (!error) return null
+    const text = `${error.code ?? ''} ${error.message ?? ''}`.toLowerCase()
+    if (text.includes('anonymous') && text.includes('disabled')) return 'الدخول كضيف مقفل الحين. ادخل بإيميلك أو بقوقل.'
+    return messageFor(error)
+  }
+
   // الدخول بقوقل: نوديه لصفحة قوقل، وبعد ما يوافق يرجع لـ /login وSupabase يقرأ الجلسة من الرابط.
   // `next` = الصفحة اللي كان رايح لها، عشان نرجعه لها بعد الدخول.
   async function signInWithGoogle(next = '/upload') {
@@ -62,7 +72,7 @@ export function AuthProvider({ children }) {
     await supabase.auth.signOut()
   }
 
-  const value = { session, user: session?.user ?? null, ready, signIn, signInWithGoogle, signUp, signOut }
+  const value = { session, user: session?.user ?? null, isGuest: Boolean(session?.user?.is_anonymous), ready, signIn, signInWithGoogle, signInAsGuest, signUp, signOut }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 

@@ -41,6 +41,7 @@ If I ask for anything out of scope, say so before building it.
 
 Notes:
 - Auth = email + password, **"Confirm email" turned OFF** in Supabase. The free default email sender only delivers to project team members, so no auth emails are sent. No "forgot password" in the MVP.
+- Guest sign-in (added 2026-11-26): Supabase anonymous sign-ins are ON. Guests get the `authenticated` role, so the same RLS applies (own rows only). Their data lives only in that browser session; signing out loses it.
 - Google sign-in (added 2026-11-25): Supabase Google provider + a Google Cloud OAuth client in **Testing** mode, so only the emails listed as test users can use it. Publishing it for everyone needs a privacy-policy page and the Branding page filled in. Supabase URL Configuration: Site URL and Redirect URLs point to the Vercel domain.
 - Free Supabase projects pause after ~1 week of no use. Resume from the dashboard.
 - The study plan is a static JS file, not a database table: it is the same for everyone and read-only.

@@ -17,7 +17,7 @@ const PAGES = [
 
 // زر ☰ في الزاوية، وقائمة تطلع من الجنب. يطلع بس للي داخل حسابه.
 export function MenuButton() {
-  const { user, signOut } = useAuth()
+  const { user, signOut, isGuest } = useAuth()
   const { hasRecord } = useStudent()
   const { pathname } = useLocation()
   const navigate = useNavigate()
@@ -67,7 +67,7 @@ export function MenuButton() {
               رتّب جدولك في «ترتيبه» ↗
             </a>
 
-            <button type="button" className="link muted drawer__signout" onClick={handleSignOut}>اطلع من حسابك</button>
+            <button type="button" className="link muted drawer__signout" onClick={handleSignOut}>{isGuest ? 'اطلع من وضع الضيف (بتضيع بياناتك)' : 'اطلع من حسابك'}</button>
           </nav>
         </div>
       )}

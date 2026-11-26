@@ -3,7 +3,7 @@ import { useAuth } from './AuthContext.jsx'
 
 // رابط صغير «اطلع من حسابك»: يطلع من Supabase ويرجعه لصفحة الدخول.
 export function SignOutLink() {
-  const { signOut } = useAuth()
+  const { signOut, isGuest } = useAuth()
   const navigate = useNavigate()
 
   async function handleClick() {
@@ -13,7 +13,7 @@ export function SignOutLink() {
 
   return (
     <button type="button" className="link muted" style={{ alignSelf: 'center', marginInlineStart: 0 }} onClick={handleClick}>
-      اطلع من حسابك
+      {isGuest ? 'اطلع من وضع الضيف (بتضيع بياناتك)' : 'اطلع من حسابك'}
     </button>
   )
 }
