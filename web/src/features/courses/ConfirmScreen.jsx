@@ -37,15 +37,18 @@ export default function ConfirmScreen() {
             <h1 className="display">أول ترم لك؟</h1>
             <p className="muted">ما لقينا ولا مادة خالصة في سجلك. في أول ترم، الجامعة تسجّل لك مواد المستوى الأول تلقائياً، فما تحتاج تسوي شي الحين. ارجع لنا قبل تسجيل الترم الثاني.</p>
           </div>
-          <FileChecks name={<bdi dir="ltr">Faisal Al-Harbi</bdi>} transcriptNote="ما فيه درجات للحين" />
+          <FileChecks
+            name={`${coursesCount(student.currentLevel.courses.length + student.mandatoryUniversity.length)} باقية لترمك الجاي`}
+            transcriptNote="ما فيه درجات للحين"
+          />
           <div className="grow">
             <div className="card">
               <span className="bold">خطأ؟ خلصت مواد وما طلعت؟</span>
-              <span className="caption muted">يمكن رفعت سجل قديم. نزّل نسخة جديدة من الخدمات الذاتية، أو ضيف موادك بيدك.</span>
-              <button type="button" className="link semibold" style={{ color: 'var(--color-text)' }}>ضيف مادة خلصتها</button>
+              <span className="caption muted">يمكن رفعت سجل قديم. نزّل نسخة جديدة من الخدمات الذاتية وارفعها.</span>
+              <Link to="/upload" className="link semibold" style={{ color: 'var(--color-text)' }}>ارفع سجل جديد</Link>
             </div>
           </div>
-          <Link to="/login" className="btn btn--primary">تمام، بتجينا قبل الترم الثاني</Link>
+          <Link to="/plan" className="btn btn--primary">تمام، وريني موادي</Link>
         </>
       ) : (
         <>
